@@ -1,0 +1,14 @@
+{
+  "name": "alivedb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "techcoderx",
+  "license": "MIT",
+  "dependencies": {
+    "gun": "^0.2020.520"
+  }
+}
