@@ -40,13 +40,15 @@ let db = {
             else cb()
         })
     },
-    getListFromUser: (pub,listId) => {
+    getListFromUser: (pub,listId,retainGunInfo) => {
         return new Promise((rs,rj) => {
             let list = []
             Gun.user(pub).get(listId).once(async (data) => {
                 let itemIds = Object.keys(data)
                 for (let i = 1; i < itemIds.length; i++) {
                     let itm = await db.getItem(data[itemIds[i]]['#'])
+                    if (!retainGunInfo)
+                        delete itm._
                     list.push(itm)
                 }
                 rs(list)
@@ -57,6 +59,13 @@ let db = {
         return new Promise((rs,rj) => {
             Gun.get(itemId,(data) => {
                 rs(data.put)
+            })
+        })
+    },
+    getSetLength: (pub,listId) => {
+        return new Promise((rs,rj) => {
+            Gun.user(pub).get(listId).once((data) => {
+                rs(Object.keys(data).length - 1)
             })
         })
     }

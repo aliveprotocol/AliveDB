@@ -1,4 +1,3 @@
-const homedir = require('os').homedir()
 const yargs = require('yargs')
 const argv = yargs(process.argv).argv
 
