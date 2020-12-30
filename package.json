@@ -12,7 +12,7 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "gun": "git+https://github.com/amark/gun.git",
-    "javalon": "^1.0.28",
+    "is-ipfs": "^2.0.0",
     "yargs": "^16.1.0"
   }
 }

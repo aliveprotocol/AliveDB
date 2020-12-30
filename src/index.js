@@ -39,10 +39,10 @@ app.post('/loginUser',(req,res) => {
     if (!req.body.id && req.body.pub) db.getIdFromPub(req.body.pub,(id) => {
         if (!id)
             return res.status(404).send({error: 'Public key does not exist'})
-        db.login(id,req.body.key,(e) => helper.loginHandler(e,res))
+        db.login(id,req.body.key,(e) => helper.cbHandler(e,res))
     })
     else
-        db.login(req.body.id,req.body.key,(e) => helper.loginHandler(e,res))
+        db.login(req.body.id,req.body.key,(e) => helper.cbHandler(e,res))
 })
 
 // Current logged in user (if any)
@@ -54,6 +54,26 @@ app.get('/currentUser',(req,res) => {
         currentUser.loggedIn = true
         res.send(currentUser)
     }
+})
+
+// Push new stream chunk as current logged in user
+app.post('/pushStream',(req,res) => {
+    let currentUser = db.currentUser()
+    if (!currentUser)
+        return res.status(401).send({error: 'Not logged in'})
+    let streamValidator = validator.stream(req.body)
+    if (streamValidator !== null)
+        return res.status(400).send({error: streamValidator})
+    db.pushStream(req.body,(e) => helper.cbHandler(e,res))
+})
+
+app.get('/getStream',async (req,res) => {
+    if (!req.query.pub)
+        return res.status(400).send({error: 'Missing streamer public key'})
+    let reqValidate = validator.streamLink(req.query)
+    if (reqValidate !== null)
+        return res.status(400).send({error: reqValidate})
+    res.send(await db.getListFromUser(req.query.pub,req.query.network + '/' + req.query.streamer + '/' + req.query.link))
 })
 
 http.listen(Config.http_port,() => console.log(`AliveDB API server listening on port ${Config.http_port}`))

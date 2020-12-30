@@ -33,7 +33,33 @@ let db = {
                 cb()
         })
     },
-    currentUser: () => user.is
+    currentUser: () => user.is,
+    pushStream: (metadata,cb) => {
+        user.get(metadata.network + '/' + metadata.streamer + '/' + metadata.link).set(metadata.stream,(ack) => {
+            if (ack.err) return cb(ack.err)
+            else cb()
+        })
+    },
+    getListFromUser: (pub,listId) => {
+        return new Promise((rs,rj) => {
+            let list = []
+            Gun.user(pub).get(listId).once(async (data) => {
+                let itemIds = Object.keys(data)
+                for (let i = 1; i < itemIds.length; i++) {
+                    let itm = await db.getItem(data[itemIds[i]]['#'])
+                    list.push(itm)
+                }
+                rs(list)
+            })
+        })
+    },
+    getItem: (itemId) => {
+        return new Promise((rs,rj) => {
+            Gun.get(itemId,(data) => {
+                rs(data.put)
+            })
+        })
+    }
 }
 
 module.exports = db

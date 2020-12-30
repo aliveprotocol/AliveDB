@@ -6,7 +6,7 @@ module.exports = {
             permlink += possible.charAt(Math.floor(Math.random() * possible.length))
         return permlink
     },
-    loginHandler: (e,res) => {
+    cbHandler: (e,res) => {
         if (e)
             res.status(400).send({success: false, error: e})
         else

@@ -1,13 +1,16 @@
+const isIPFS = require('is-ipfs')
+
 let validator = {
     lists: {
         network: ['dtc','hive'],
+        resolutions: ['src','240','480','720','1080']
     },
     network: (val) => {
         if (!val)
             return 'missing network'
         if (typeof val !== 'string')
             return 'invalid type'
-        else if (validator.lists.network.includes(val))
+        else if (!validator.lists.network.includes(val))
             return 'invalid network'
         return null
     },
@@ -70,7 +73,18 @@ let validator = {
             return 'Key must be a string'
         return null
     },
-    streamMetadata: (metadata) => {
+    stream: (metadata) => {
+        let metaValidate = validator.network(metadata)
+        if (metaValidate !== null)
+            return metaValidate
+
+        let streamValidate = validator.streamChunk(metadata.stream)
+        if (streamValidate !== null)
+            return streamValidate
+
+        return null
+    },
+    streamLink: (metadata) => {
         let networkValidate = validator.network(metadata.network)
         if (networkValidate !== null)
             return networkValidate
@@ -82,7 +96,34 @@ let validator = {
         let linkValidate = validator.link(metadata.link)
         if (linkValidate !== null)
             return linkValidate
-            
+
+        return null
+    },
+    streamChunk: (info) => {
+        if (!info)
+            return 'Missing stream chunk'
+        if (typeof info.len !== 'number')
+            return 'Stream chunk length must be a number'
+        let resolutions = Object.keys(info)
+        for (let i in resolutions) if (resolutions[i] !== 'len') {
+            if (!validator.lists.resolutions.includes(resolutions[i]))
+                return 'Invalid resolution ' + resolutions[i]
+            else if (typeof info[resolutions[i]] !== 'string')
+                return resolutions[i] + ' hash must be a string'
+            else if (!isIPFS.cid(info[resolutions[i]]) && validator.skylink(info[resolutions[i]]) !== null)
+                return 'Invalid ' + resolutions[i] + ' hash'
+        }
+        return null
+    },
+    skylink: (skylink) => {
+        if (typeof skylink !== 'string')
+            return 'Skylinks must be a string'
+        else if (skylink.length !== 46)
+            return 'Skylinks must be 46 characters long'
+        let skyAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
+        for (let i = 0; i < skylink.length; i++)
+            if (skyAlphabet.indexOf(skylink[i]) === -1)
+                return 'Invalid character found in Skylink'
         return null
     }
 }
