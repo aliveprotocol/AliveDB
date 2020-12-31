@@ -5,8 +5,7 @@ const argv = yargs(process.argv).argv
 let config = {
     peers: [],
     http_port: 3006,
-    gun_port: 3007,
-    expiry: 600 // 10 minutes
+    gun_port: 3007
 }
 
 // Config overwrites through CLI args or environment vars

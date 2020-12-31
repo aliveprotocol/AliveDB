@@ -35,7 +35,7 @@ let db = {
     },
     currentUser: () => user.is,
     pushStream: (metadata,cb) => {
-        user.get(metadata.network + '/' + metadata.streamer + '/' + metadata.link + '<?'+Config.expiry).set(metadata.stream,(ack) => {
+        user.get(metadata.network + '/' + metadata.streamer + '/' + metadata.link + '<?600').set(metadata.stream,(ack) => {
             if (ack.err) return cb(ack.err)
             else cb()
         })
@@ -43,9 +43,9 @@ let db = {
     getListFromUser: (pub,listId,retainGunInfo) => {
         return new Promise((rs,rj) => {
             let list = []
-            Gun.user(pub).get(listId+'<?'+Config.expiry).once(async (data) => {
+            Gun.user(pub).get(listId+'<?600').once(async (data) => {
                 let itemIds = Object.keys(data)
-                for (let i = 1; i < itemIds.length; i++) if (new Date().getTime() - data._['>'][itemIds[i]] < Config.expiry*1000) {
+                for (let i = 1; i < itemIds.length; i++) if (new Date().getTime() - data._['>'][itemIds[i]] < 600000) {
                     let itm = await db.getItem(data[itemIds[i]]['#'])
                     if (!retainGunInfo && itm && itm._)
                         delete itm._
