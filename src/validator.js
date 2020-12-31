@@ -9,7 +9,7 @@ let validator = {
         if (!val)
             return 'missing network'
         if (typeof val !== 'string')
-            return 'invalid type'
+            return 'invalid network data type'
         else if (!validator.lists.network.includes(val))
             return 'invalid network'
         return null
@@ -74,7 +74,7 @@ let validator = {
         return null
     },
     stream: (metadata) => {
-        let metaValidate = validator.network(metadata)
+        let metaValidate = validator.streamLink(metadata)
         if (metaValidate !== null)
             return metaValidate
 

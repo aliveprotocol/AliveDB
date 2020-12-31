@@ -67,6 +67,7 @@ app.post('/pushStream',(req,res) => {
     db.pushStream(req.body,(e) => helper.cbHandler(e,res))
 })
 
+// Get stream by public key and link
 app.get('/getStream',async (req,res) => {
     if (!req.query.pub)
         return res.status(400).send({error: 'Missing streamer public key'})
