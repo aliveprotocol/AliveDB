@@ -7,7 +7,8 @@ let user = Gun.user()
 
 let db = {
     init: () => {
-        http.listen(Config.gun_port,() => console.log(`AliveDB GUN P2P server listening on port ${Config.gun_port}`))
+        if (Config.gun_port)
+            http.listen(Config.gun_port,() => console.log(`AliveDB GUN P2P server listening on port ${Config.gun_port}`))
     },
     createUser: (streamerID,aliveDbKey,cb) => {
         user.create(streamerID,aliveDbKey,(res) => {

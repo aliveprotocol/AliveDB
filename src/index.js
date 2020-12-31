@@ -5,7 +5,6 @@ const db = require('./alivedb')
 const Express = require('express')
 const bodyParser = require('body-parser')
 const app = Express()
-const http = require('http').Server(app)
 
 db.init()
 
@@ -77,4 +76,4 @@ app.get('/getStream',async (req,res) => {
     res.send(await db.getListFromUser(req.query.pub,req.query.network + '/' + req.query.streamer + '/' + req.query.link))
 })
 
-http.listen(Config.http_port,() => console.log(`AliveDB API server listening on port ${Config.http_port}`))
+app.listen(Config.http_port,() => console.log(`AliveDB API server listening on port ${Config.http_port}`))
