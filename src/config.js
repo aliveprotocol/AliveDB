@@ -3,6 +3,7 @@ const argv = yargs(process.argv).argv
 
 // Default config
 let config = {
+    data_dir: '',
     peers: [],
     http_port: 3006,
     gun_port: 3007

@@ -1,7 +1,7 @@
 const Config = require('./config')
 const http = require('http').createServer()
 const GunDB = require('gun')
-const Gun = GunDB({ web: http, peers: Config.peers })
+const Gun = GunDB({ web: http, peers: Config.peers, file: Config.data_dir })
 
 let user = Gun.user()
 
