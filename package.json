@@ -4,8 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "build": "pkg src/index.js --out-path bin"
+    "start": "node src/index.js"
   },
   "author": "techcoderx",
   "license": "MIT",
@@ -15,8 +14,5 @@
     "gun": "git+https://github.com/amark/gun.git",
     "is-ipfs": "^2.0.0",
     "yargs": "^16.1.0"
-  },
-  "devDependencies": {
-    "pkg": "^4.4.9"
   }
 }
