@@ -1,7 +1,7 @@
 {
   "name": "alivedb",
   "version": "1.0.0",
-  "description": "",
+  "description": "Off-chain GunDB database for Alive protocol streams",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js"
