@@ -66,6 +66,15 @@ let validator = {
             return 'Link must only contain letters, digits, dashes and underscores'
         return null
     },
+    aliveDbId: (val) => {
+        if (!val)
+            return 'User ID is required'
+        if (typeof val !== 'string')
+            return 'User ID must be a string'
+        else if (val.length < 3 || val.length > 50)
+            return 'User ID must be between 3 and 50 characters long'
+        return validator.dtcUsername(val)
+    },
     aliveDbKey: (val) => {
         if (!val)
             return 'Key is required'

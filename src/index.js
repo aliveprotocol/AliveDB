@@ -15,10 +15,14 @@ app.use(bodyParser.json())
 app.post('/createUser',(req,res) => {
     let id = req.body.id || helper.randomId(16)
     let key = req.body.key
+    let idValidate = validator.aliveDbId(id)
     let keyValidate = validator.aliveDbKey(key)
 
     if (keyValidate !== null)
         return res.status(400).send({error: keyValidate})
+
+    if (idValidate !== null)
+        return res.status(400).send({error: idValidate})
 
     db.createUser(id,key,(e,pub) => {
         if (e)
