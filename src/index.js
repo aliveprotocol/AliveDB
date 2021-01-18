@@ -77,7 +77,7 @@ app.get('/getStream',async (req,res) => {
     let reqValidate = validator.streamLink(req.query)
     if (reqValidate !== null)
         return res.status(400).send({error: reqValidate})
-    res.send(await db.getListFromUser(req.query.pub,req.query.network + '/' + req.query.streamer + '/' + req.query.link))
+    res.send(await db.getListFromUser(req.query.pub,req.query.network + '/' + req.query.streamer + '/' + req.query.link,false,0))
 })
 
 app.listen(Config.http_port,() => console.log(`AliveDB API server listening on port ${Config.http_port}`))
