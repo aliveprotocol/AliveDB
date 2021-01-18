@@ -13,4 +13,8 @@ let config = {
 for (let c in config)
     config[c] = argv[c] || process.env['ALIVEDB_' + c.toUpperCase()] || config[c]
 
+// Comma separated peers list
+if (typeof config.peers === 'string')
+    config.peers = config.peers.split(',')
+
 module.exports = config
