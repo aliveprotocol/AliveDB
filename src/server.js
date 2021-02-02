@@ -47,6 +47,24 @@ app.post('/loginUser',(req,res) => {
         db.login(req.body.id,req.body.key,(e) => helper.cbHandler(e,res))
 })
 
+// Change user key
+app.post('/changeKey',(req,res) => {
+    if (!req.body.id && !req.body.pub)
+        return res.status(400).send({error: 'User ID or public key is required'})
+    else if (!req.body.key)
+        return res.status(400).send({error: 'Old key is required'})
+    else if (!req.body.newkey)
+        return res.status(400).send({error: 'New key is required'})
+
+    if (!req.body.id && req.body.pub) db.getIdFromPub(req.body.pub,(id) => {
+        if (!id)
+            return res.status(404).send({error: 'Public key does not exist'})
+        db.changeKey(id,req.body.key,req.body.newkey,(e) => helper.cbHandler(e,res))
+    })
+    else
+        db.changeKey(req.body.id,req.body.key,req.body.newkey,(e) => helper.cbHandler(e,res))
+})
+
 // Current logged in user (if any)
 app.get('/currentUser',(req,res) => {
     let currentUser = db.currentUser()

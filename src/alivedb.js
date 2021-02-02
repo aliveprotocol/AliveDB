@@ -34,6 +34,14 @@ let db = {
                 cb()
         })
     },
+    changeKey: (id,oldkey,newkey,cb) => {
+        user.auth(id,oldkey,(result) => {
+            if (result.err)
+                cb(result.err)
+            else
+                cb()
+        },{ change: newkey })
+    },
     currentUser: () => user.is,
     pushStream: (metadata,cb) => {
         user.get(metadata.network + '/' + metadata.streamer + '/' + metadata.link + '<?600').set(metadata.stream,(ack) => {
