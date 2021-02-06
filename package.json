@@ -9,10 +9,14 @@
   "author": "techcoderx",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.21.1",
+    "base58": "^2.0.1",
     "body-parser": "^1.19.0",
+    "crypto-js": "^4.0.0",
     "express": "^4.17.1",
     "gun": "git+https://github.com/amark/gun.git",
     "is-ipfs": "^2.0.0",
+    "secp256k1": "^4.0.2",
     "yargs": "^16.1.0"
   }
 }

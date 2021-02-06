@@ -10,23 +10,99 @@
 
 // To use this middleware, import this file right after importing gundb.
 const GunDB = require('gun/gun')
+const axios = require('axios')
+const cg = require('./cryptography')
+
+// todo detect for public key updates in realtime?
+let participants = {
+    dtc: {},
+    hive: {},
+    steem: {}
+}
 
 GunDB.on('opt',function (ctx) {
     if (ctx.once) return
     this.to.next(ctx)
 
-    ctx.on('in',function (msg) {
+    ctx.on('in',async function (msg) {
         if (msg.put) {
             let key = Object.keys(msg.put)
-            if (key.length > 0 && !key[0].startsWith('~')) {
+            let keydet = key[0].split('/')
+            if (key.length > 0 && keydet[0] === 'alivedb_chat' && keydet.length === 4) {
                 // when screening data outside of Gun.user() namespace,
-                // the first key should not start with '~'
-                // for live chat, root key would be 'alivedb_chat'
-                // usually implemented in browsers and backends such as HAlive
-                // console.log('inmsg',JSON.stringify(msg.put))
+                // the first (root) key should not start with '~'
+                // for live chat, keys would be 'alivedb_chat' -> network -> streamer -> link
+                // message content template:
+                /*
+                {
+                    u: 'username',
+                    n: 'network (dtc, hive, steem etc)',
+                    s: 'signature',
+                    r: recid,
+                    m: 'my chat message goes here'
+                }
+                */
+                let received = msg.put[key[0]]
+                if (!received.u || !received.n || !received.s || !received.r || !received.m) return
+                if (typeof received.u !== 'string' || typeof received.s !== 'string' || typeof received.m !== 'string') return
+                if (!participants[received.n]) return
+
+                // Recover public key from message signature
+                let pubkeystr = ''
+                try {
+                    let pubkey = cg.recoverFromSig(received.s,received.r,cg.createHash(received.u,received.n,received.m))
+                    if (received.n === 'dtc')
+                        pubkeystr = cg.avalonEncode(pubkeystr)
+                    else
+                        pubkeystr = cg.grapheneEncodePub(pubkey)
+                } catch { return }
+
+                // Verify public key in account
+                let validKeys = await getAccountKeys(received.u,received.n)
+                if (!validKeys.includes(pubkeystr)) return
+                console.log('received valid chat message',msg.put)
             }
         }
         // valid data received, proceed to next middleware
         this.to.next(msg)
     })
 })
+
+function getAccountKeys(user,network) {
+    return new Promise(async (rs,rj) => {
+        if (participants[network][user]) return rs(participants[network][user])
+        // todo blockchain api config
+        if (network === 'dtc')
+            axios.get('https://avalon.oneloved.tube/account/'+user).then((d) => {
+                // Allow master key and type 4 custom keys
+                let allowedKeys = [d.data.pub]
+                for (let i in d.data.keys)
+                    if (d.data.keys[i].types.includes(4))
+                        allowedKeys.push(d.data.keys[i].pub)
+                participants.dtc[user] = allowedKeys
+                rs(allowedKeys)
+            }).catch(rj)
+        else {
+            let rpc = network === 'hive' ? 'https://techcoderx.com' : 'https://api.steemit.com'
+            axios.post(rpc,{
+                id: 1,
+                jsonrpc: '2.0',
+                method: 'condenser_api.get_accounts',
+                params: [[user]]
+            }).then((d) => {
+                if (d.data.result && d.data.result.length > 0) {
+                    // Allow posting, active and owner keys
+                    let allowedKeys = []
+                    for (let i in d.data.result[0].posting.key_auths)
+                        allowedKeys.push(d.data.result[0].posting.key_auths[i][0])
+                    for (let i in d.data.result[0].active.key_auths)
+                        allowedKeys.push(d.data.result[0].active.key_auths[i][0])
+                    for (let i in d.data.result[0].owner.key_auths)
+                        allowedKeys.push(d.data.result[0].owner.key_auths[i][0])
+                    participants[network][user] = allowedKeys
+                    rs(allowedKeys)
+                } else rj(d.data.error)
+            }).catch(rj)
+        }
+    })
+}
