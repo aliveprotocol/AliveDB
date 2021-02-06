@@ -39,8 +39,8 @@ function recoverFromSig(sig,recid,msg) {
     return secp256k1.ecdsaRecover(bs58.decode(sig),recid,msg)
 }
 
-function createHash(username,network,msg) {
-    return sha256(username+network+msg)
+function createHash(ts,username,network,msg) {
+    return sha256(ts+'_'+username+'_'+network+'_'+msg)
 }
 
 function sign(key,hash) {

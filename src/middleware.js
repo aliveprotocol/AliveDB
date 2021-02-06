@@ -39,18 +39,19 @@ GunDB.on('opt',function (ctx) {
                     n: 'network (dtc, hive, steem etc)',
                     s: 'signature',
                     r: recid,
+                    t: timestamp,
                     m: 'my chat message goes here'
                 }
                 */
                 let received = msg.put[key[0]]
-                if (!received.u || !received.n || !received.s || (!received.r && received.r !== 0) || !received.m) return
-                if (typeof received.u !== 'string' || typeof received.s !== 'string' || typeof received.r !== 'number' || typeof received.m !== 'string') return
+                if (!received.u || !received.n || !received.s || (!received.r && received.r !== 0) || !received.t || !received.m) return
+                if (typeof received.u !== 'string' || typeof received.s !== 'string' || typeof received.r !== 'number' || typeof received.t !== 'number' || typeof received.m !== 'string') return
                 if (!participants[received.n]) return
 
                 // Recover public key from message signature
                 let pubkeystr = ''
                 try {
-                    let pubkey = cg.recoverFromSig(received.s,received.r,cg.createHash(received.u,received.n,received.m))
+                    let pubkey = cg.recoverFromSig(received.s,received.r,cg.createHash(received.t,received.u,received.n,received.m))
                     if (received.n === 'dtc')
                         pubkeystr = cg.avalonEncode(pubkey)
                     else
