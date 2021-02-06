@@ -20,6 +20,8 @@ let participants = {
     steem: {}
 }
 
+let recentMsg = {}
+
 GunDB.on('opt',function (ctx) {
     if (ctx.once) return
     this.to.next(ctx)
@@ -48,6 +50,9 @@ GunDB.on('opt',function (ctx) {
                 if (typeof received.u !== 'string' || typeof received.s !== 'string' || typeof received.r !== 'number' || typeof received.t !== 'number' || typeof received.m !== 'string') return
                 if (!participants[received.n]) return
 
+                // All messages must be unique
+                if (recentMsg[received.s]) return
+
                 // Recover public key from message signature
                 let pubkeystr = ''
                 try {
@@ -61,6 +66,7 @@ GunDB.on('opt',function (ctx) {
                 // Verify public key in account
                 let validKeys = await getAccountKeys(received.u,received.n)
                 if (!validKeys.includes(pubkeystr)) return
+                recentMsg[received.s] = received.t
                 console.log('received valid chat from',pubkeystr,msg.put)
             }
         }
