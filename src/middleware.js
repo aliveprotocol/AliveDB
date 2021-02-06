@@ -46,8 +46,8 @@ GunDB.on('opt',function (ctx) {
                 }
                 */
                 let received = msg.put[key[0]]
-                if (!received.u || !received.n || !received.s || (!received.r && received.r !== 0) || !received.t || !received.m) return
-                if (typeof received.u !== 'string' || typeof received.s !== 'string' || typeof received.r !== 'number' || typeof received.t !== 'number' || typeof received.m !== 'string') return
+                if (!received.u || !received.n || !received.s || (received.n === 'dtc' && !received.r && received.r !== 0) || !received.t || !received.m) return
+                if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return
                 if (!participants[received.n]) return
 
                 // All messages must be unique
@@ -56,11 +56,11 @@ GunDB.on('opt',function (ctx) {
                 // Recover public key from message signature
                 let pubkeystr = ''
                 try {
-                    let pubkey = cg.recoverFromSig(received.s,received.r,cg.createHash(received.t,received.u,received.n,received.m))
+                    let hash = cg.createHash(received.t,received.u,received.n,received.m)
                     if (received.n === 'dtc')
-                        pubkeystr = cg.avalonEncode(pubkey)
+                        pubkeystr = cg.avalonEncode(cg.avalonRecoverFromSig(received.s,received.r,hash))
                     else
-                        pubkeystr = cg.grapheneEncodePub(pubkey)
+                        pubkeystr = cg.Signature.fromString(received.s).recover(hash)
                 } catch { return }
 
                 // Verify public key in account
