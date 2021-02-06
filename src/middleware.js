@@ -28,10 +28,10 @@ GunDB.on('opt',function (ctx) {
         if (msg.put) {
             let key = Object.keys(msg.put)
             let keydet = key[0].split('/')
-            if (key.length > 0 && keydet[0] === 'alivedb_chat' && keydet.length === 4) {
+            if (key.length > 0 && keydet[0] === 'alivedb_chat' && keydet.length === 5) {
                 // when screening data outside of Gun.user() namespace,
                 // the first (root) key should not start with '~'
-                // for live chat, keys would be 'alivedb_chat' -> network -> streamer -> link
+                // for live chat, keys would be 'alivedb_chat' -> network -> streamer -> link -> messageId
                 // message content template:
                 /*
                 {
@@ -43,8 +43,8 @@ GunDB.on('opt',function (ctx) {
                 }
                 */
                 let received = msg.put[key[0]]
-                if (!received.u || !received.n || !received.s || !received.r || !received.m) return
-                if (typeof received.u !== 'string' || typeof received.s !== 'string' || typeof received.m !== 'string') return
+                if (!received.u || !received.n || !received.s || (!received.r && received.r !== 0) || !received.m) return
+                if (typeof received.u !== 'string' || typeof received.s !== 'string' || typeof received.r !== 'number' || typeof received.m !== 'string') return
                 if (!participants[received.n]) return
 
                 // Recover public key from message signature
@@ -52,7 +52,7 @@ GunDB.on('opt',function (ctx) {
                 try {
                     let pubkey = cg.recoverFromSig(received.s,received.r,cg.createHash(received.u,received.n,received.m))
                     if (received.n === 'dtc')
-                        pubkeystr = cg.avalonEncode(pubkeystr)
+                        pubkeystr = cg.avalonEncode(pubkey)
                     else
                         pubkeystr = cg.grapheneEncodePub(pubkey)
                 } catch { return }
@@ -60,7 +60,7 @@ GunDB.on('opt',function (ctx) {
                 // Verify public key in account
                 let validKeys = await getAccountKeys(received.u,received.n)
                 if (!validKeys.includes(pubkeystr)) return
-                console.log('received valid chat message',msg.put)
+                console.log('received valid chat from',pubkeystr,msg.put)
             }
         }
         // valid data received, proceed to next middleware
