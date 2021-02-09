@@ -17,12 +17,12 @@ function sha256(input) {
     return hash
 }
 
-function createHash(ts,username,network,msg) {
-    return sha256(ts+'_'+username+'_'+network+'_'+msg)
+function createHash(ts,username,network,msg,streamNetwork,streamer,streamLink) {
+    return sha256(ts+'_'+username+'_'+network+'_'+msg+'_'+streamNetwork+'/'+streamer+'/'+streamLink)
 }
 
-function createHashRequest(ts,username,network) {
-    return sha256('alivedb_chat_request'+'_'+ts+'_'+username+'_'+network)
+function createHashRequest(ts,username,network,streamNetwork,streamer,streamLink) {
+    return sha256('alivedb_chat_request'+'_'+ts+'_'+username+'_'+network+'_'+streamNetwork+'/'+streamer+'/'+streamLink)
 }
 
 function grapheneEncodePub(key,prefix = 'STM') {

@@ -21,7 +21,6 @@ let middleware = {
         hive: {},
         steem: {}
     },
-    recentMsg: {},
     getAccountKeys,
     getAccountKeysMulti
 }
@@ -50,27 +49,24 @@ GunDB.on('opt',function (ctx) {
                     m: 'my chat message goes here'
                 }
                 */
-                if (!received.u || !received.n || !received.s || (received.n === 'dtc' && !received.r && received.r !== 0) || !received.t || !received.m) return console.log('0')
-                if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return console.log('1')
-                if (!middleware.participants[received.n] || !middleware.participants[received.n][received.u]) return console.log('2')
-
-                // All messages must be unique
-                if (middleware.recentMsg[received.s]) return console.log('3')
+                if (!received.u || !received.n || !received.s || (received.n === 'dtc' && !received.r && received.r !== 0) || !received.t || !received.m) return
+                if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return
+                if (!middleware.participants[received.n] || !middleware.participants[received.n][received.u]) return
+                if (Math.abs(received.t - received._['>'].t) > 5000) return
 
                 // Recover public key from message signature
                 let pubkeystr = ''
                 try {
-                    let hash = cg.createHash(received.t,received.u,received.n,received.m)
+                    let hash = cg.createHash(received.t,received.u,received.n,received.m,keydet[1],keydet[2],keydet[3])
                     if (received.n === 'dtc')
                         pubkeystr = cg.avalonEncode(cg.avalonRecoverFromSig(received.s,received.r,hash))
                     else
                         pubkeystr = cg.Signature.fromString(received.s).recover(hash)
-                } catch { return console.log('4') }
+                } catch { return }
 
                 // Verify public key in account
-                if (!middleware.participants[received.n][received.u].includes(pubkeystr)) return console.log('5')
-                middleware.recentMsg[received.s] = received.t
-                console.log('received valid chat from',pubkeystr,msg.put)
+                if (!middleware.participants[received.n][received.u].includes(pubkeystr)) return
+                console.log('received valid chat from',pubkeystr,received)
             } else if (key.length > 0 && key[0].startsWith('alivedb_chat_request/'+config.chat_listener) && keydet.length === 6) {
                 // AliveDB chat participation request received
                 // Format should be alivedb_chat_request/stream_network/streamer/link/participant_network/participant_username
@@ -86,7 +82,7 @@ GunDB.on('opt',function (ctx) {
                         // Verify signature
                         let validKeys = []
                         try {
-                            let hash = cg.createHashRequest(received.t,keydet[5],keydet[4])
+                            let hash = cg.createHashRequest(received.t,keydet[5],keydet[4],keydet[1],keydet[2],keydet[3])
                             let pubkeystr = ''
                             if (keydet[4] === 'dtc')
                                 pubkeystr = cg.avalonEncode(cg.avalonRecoverFromSig(received.s,received.r,hash))
@@ -94,7 +90,7 @@ GunDB.on('opt',function (ctx) {
                                 pubkeystr = cg.Signature.fromString(received.s).recover(hash)
                             validKeys = await getAccountKeys(keydet[5],keydet[4])
                             if (!validKeys.includes(pubkeystr)) return
-                        } catch (e) { return console.log('verification failed',e.toString()) }
+                        } catch (e) { return }
                         gunUser.get(config.chat_listener+'/participants').get(keydet[4]).get(keydet[5]).put(1,(ack) => {
                             if (ack.ok) console.log('Successfully approved',keydet[5],keydet[4])
                             middleware.participants[keydet[4]][keydet[5]] = validKeys
