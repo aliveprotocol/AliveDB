@@ -6,7 +6,8 @@ let config = {
     data_dir: '',
     peers: [],
     http_port: 3006,
-    gun_port: 3007
+    gun_port: 3007,
+    chat_listener: ''
 }
 
 // Config overwrites through CLI args or environment vars

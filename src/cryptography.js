@@ -21,6 +21,10 @@ function createHash(ts,username,network,msg) {
     return sha256(ts+'_'+username+'_'+network+'_'+msg)
 }
 
+function createHashRequest(ts,username,network) {
+    return sha256('alivedb_chat_request'+'_'+ts+'_'+username+'_'+network)
+}
+
 function grapheneEncodePub(key,prefix = 'STM') {
     const checksum = ripemd160(key)
     return prefix + bs58.encode(Buffer.concat([key,checksum.slice(0,4)]))
@@ -121,6 +125,7 @@ module.exports = {
     avalonDecode,
     avalonRecoverFromSig,
     createHash,
+    createHashRequest,
     avalonSign,
     grapheneSign,
     Signature

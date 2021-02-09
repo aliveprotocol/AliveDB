@@ -12,6 +12,7 @@
 const GunDB = require('gun/gun')
 const axios = require('axios')
 const cg = require('./cryptography')
+const config = require('./config')
 
 // todo detect for public key updates in realtime?
 let participants = {
@@ -30,6 +31,7 @@ GunDB.on('opt',function (ctx) {
         if (msg.put) {
             let key = Object.keys(msg.put)
             let keydet = key[0].split('/')
+            let received = msg.put[key[0]]
             if (key.length > 0 && keydet[0] === 'alivedb_chat' && keydet.length === 5) {
                 // when screening data outside of Gun.user() namespace,
                 // the first (root) key should not start with '~'
@@ -45,7 +47,6 @@ GunDB.on('opt',function (ctx) {
                     m: 'my chat message goes here'
                 }
                 */
-                let received = msg.put[key[0]]
                 if (!received.u || !received.n || !received.s || (received.n === 'dtc' && !received.r && received.r !== 0) || !received.t || !received.m) return
                 if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return
                 if (!participants[received.n]) return
@@ -64,10 +65,41 @@ GunDB.on('opt',function (ctx) {
                 } catch { return }
 
                 // Verify public key in account
-                let validKeys = await getAccountKeys(received.u,received.n)
-                if (!validKeys.includes(pubkeystr)) return
-                recentMsg[received.s] = received.t
+                // let validKeys = await getAccountKeys(received.u,received.n)
+                // if (!validKeys.includes(pubkeystr)) return
+                // recentMsg[received.s] = received.t
                 console.log('received valid chat from',pubkeystr,msg.put)
+            } else if (key.length > 0 && key[0].startsWith('alivedb_chat_request/'+config.chat_listener) && keydet.length === 6) {
+                // AliveDB chat participation request received
+                // Format should be alivedb_chat_request/stream_network/streamer/link/participant_network/participant_username
+                if (!gunUser || !gunUser.is) return
+                if (!received.s || !received.t) return
+                if (typeof received.s !== 'string' || typeof received.t !== 'number') return
+                if (!participants[keydet[4]]) return
+                if (keydet[4] === 'dtc' && !received.r && received.r !== 0 && typeof received.r !== 'number') return
+                if (Math.abs(received.t - received._['>'].t) > 5000) return
+                if (Math.abs(received.t - new Date().getTime() > 10000)) return
+                gunUser.get(config.chat_listener+'/participants').get(keydet[4]).get(keydet[5]).once(async (val) => {
+                    if (!val && val !== 0) {
+                        // Verify signature
+                        let validKeys = []
+                        try {
+                            let hash = cg.createHashRequest(received.t,keydet[5],keydet[4])
+                            let pubkeystr = ''
+                            if (received.n === 'dtc')
+                                pubkeystr = cg.avalonEncode(cg.avalonRecoverFromSig(received.s,received.r,hash))
+                            else
+                                pubkeystr = cg.Signature.fromString(received.s).recover(hash)
+                            validKeys = await getAccountKeys(keydet[5],keydet[4])
+                            if (!validKeys.includes(pubkeystr)) return
+                        } catch { return }
+                        gunUser.get(config.chat_listener+'/participants').get(keydet[4]).get(keydet[5]).put(1,(ack) => {
+                            if (ack.ok) console.log('Successfully approved',keydet[5],keydet[4])
+                            participants[keydet[4]][keydet[5]] = validKeys
+                        })
+                    }
+                })
+                return
             }
         }
         // valid data received, proceed to next middleware

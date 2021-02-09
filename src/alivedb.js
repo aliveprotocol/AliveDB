@@ -1,9 +1,14 @@
 const Config = require('./config')
 const http = require('http').createServer()
 const GunDB = require('gun')
+require('./middleware')
 const Gun = GunDB({ web: http, peers: Config.peers, file: Config.data_dir })
 
 let user = Gun.user()
+
+// Global var clones required for middleware
+gunInstance = Gun
+gunUser = user
 
 let db = {
     init: () => {
