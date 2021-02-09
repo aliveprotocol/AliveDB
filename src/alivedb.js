@@ -1,7 +1,7 @@
 const Config = require('./config')
 const http = require('http').createServer()
 const GunDB = require('gun')
-require('./middleware')
+const middleware = require('./middleware')
 const Gun = GunDB({ web: http, peers: Config.peers, file: Config.data_dir })
 
 let user = Gun.user()
@@ -23,12 +23,14 @@ let db = {
                 cb(null,res.pub)
         })
     },
-    getIdFromPub: (pub,cb) => {
-        Gun.user(pub).once((user) => {
-            if (user && user.alias)
-                cb(user.alias)
-            else
-                cb(null)
+    getIdFromPub: (pub) => {
+        return new Promise((rs,rj) => {
+            Gun.user(pub).once((user) => {
+                if (user && user.alias)
+                    rs(user.alias)
+                else
+                    rs(null)
+            })
         })
     },
     login: (id,key,cb) => {
@@ -52,6 +54,26 @@ let db = {
         user.get(metadata.network + '/' + metadata.streamer + '/' + metadata.link + '<?600').set(metadata.stream,(ack) => {
             if (ack.err) return cb(ack.err)
             else cb()
+        })
+    },
+    fetchStreamParticipants: (pub,listId) => {
+        return new Promise((rs,rj) => {
+            let result = {
+                dtc: [],
+                hive: [],
+                steem: []
+            }
+            Gun.user(pub).get(listId+'/participants').once(async (nets) => {
+                if (!nets) rs(result)
+                for (let n in nets) if (n !== '_') {
+                    let netusers = await db.getItem(nets[n]['#'])
+                    if (netusers && netusers._) delete netusers._
+                    for (let u in netusers) if (netusers[u] !== 0)
+                        result[n].push(u)
+                }
+                middleware.participants = await middleware.getAccountKeysMulti(result)
+                rs(middleware.participants)
+            })
         })
     },
     getListFromUser: (pub,listId,retainGunInfo,minTs) => {

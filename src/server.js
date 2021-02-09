@@ -1,6 +1,7 @@
 const helper = require('./helper')
 const validator = require('./validator')
 const db = require('./alivedb')
+const config = require('./config')
 const Express = require('express')
 const bodyParser = require('body-parser')
 const app = Express()
@@ -32,19 +33,19 @@ app.post('/createUser',(req,res) => {
 
 // User login
 // Use id or public key
-app.post('/loginUser',(req,res) => {
+app.post('/loginUser',async (req,res) => {
     if (!req.body.id && !req.body.pub)
         return res.status(400).send({error: 'User ID or public key is required'})
     else if (!req.body.key)
         return res.status(400).send({error: 'Key is required'})
 
-    if (!req.body.id && req.body.pub) db.getIdFromPub(req.body.pub,(id) => {
-        if (!id)
-            return res.status(404).send({error: 'Public key does not exist'})
-        db.login(id,req.body.key,(e) => helper.cbHandler(e,res))
-    })
-    else
-        db.login(req.body.id,req.body.key,(e) => helper.cbHandler(e,res))
+    let id = req.body.id
+
+    if (!id && req.body.pub)
+        id = await db.getIdFromPub(req.body.pub)
+    if (!id)
+        return res.status(404).send({error: 'Public key does not exist'})
+    db.login(id,req.body.key,(e) => helper.cbHandler(e,res))
 })
 
 // Change user key
@@ -74,6 +75,13 @@ app.get('/currentUser',(req,res) => {
         currentUser.loggedIn = true
         res.send(currentUser)
     }
+})
+
+app.get('/fetchParticipantsKeys',async (req,res) => {
+    if (!db.currentUser())
+        return res.status(401).send({error: 'Not logged in'})
+    let authorizedKeys = await db.fetchStreamParticipants(db.currentUser().pub,config.chat_listener)
+    res.send(authorizedKeys)
 })
 
 // Push new stream chunk as current logged in user
