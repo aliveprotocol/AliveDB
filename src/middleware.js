@@ -51,7 +51,7 @@ GunDB.on('opt',function (ctx) {
                 */
                 if (!received.u || !received.n || !received.s || (received.n === 'dtc' && !received.r && received.r !== 0) || !received.t || !received.m) return
                 if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return
-                if (!middleware.participants[received.n] || !middleware.participants[received.n][received.u]) return
+                if (!middleware.participants[received.n] || (config.chat_listener && !middleware.participants[received.n][received.u])) return
                 if (Math.abs(received.t - received._['>'].t) > 5000) return
 
                 // Recover public key from message signature
@@ -65,7 +65,10 @@ GunDB.on('opt',function (ctx) {
                 } catch { return }
 
                 // Verify public key in account
-                if (!middleware.participants[received.n][received.u] || !middleware.participants[received.n][received.u].includes(pubkeystr)) return
+                // Usually done on streamer and viewer end. This cannot be checked on superpeers
+                // as it does not have access to public keys of all live chat rooms in existence.
+                // This means having ALIVEDB_CHAT_LISTENER on streamers end.
+                if (config.chat_listener && (!middleware.participants[received.n][received.u] || !middleware.participants[received.n][received.u].includes(pubkeystr))) return
                 console.log('received valid chat from',pubkeystr,received)
             } else if (key.length > 0 && key[0].startsWith('alivedb_chat_request/'+config.chat_listener) && keydet.length === 6) {
                 // AliveDB chat participation request received
