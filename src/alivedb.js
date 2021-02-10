@@ -65,7 +65,7 @@ let db = {
             }
             Gun.user(pub).get(listId+'/participants').once(async (nets) => {
                 if (!nets) rs(result)
-                for (let n in nets) if (n !== '_') {
+                for (let n in nets) if (n !== '_' && result[n]) {
                     let netusers = await db.getItem(nets[n]['#'])
                     if (netusers && netusers._) delete netusers._
                     for (let u in netusers) if (netusers[u] !== 0)
@@ -73,7 +73,20 @@ let db = {
                 }
                 middleware.participants = await middleware.getAccountKeysMulti(result)
                 rs(middleware.participants)
+                // Subscribe to requests
+                db.subRequests('dtc')
+                db.subRequests('hive')
+                db.subRequests('steem')
             })
+        })
+    },
+    subRequests: (network) => {
+        Gun.get('alivedb_chat_request/'+Config.chat_listener+'/'+network).on((d) => {
+            let k = Object.keys(d._['>'])
+            for (let l in k)
+                Gun.get(d[k[l]]['#']).on((f)=>{
+                    console.log(f)
+                })
         })
     },
     getListFromUser: (pub,listId,retainGunInfo,minTs) => {

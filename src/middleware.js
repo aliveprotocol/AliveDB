@@ -65,7 +65,7 @@ GunDB.on('opt',function (ctx) {
                 } catch { return }
 
                 // Verify public key in account
-                if (!middleware.participants[received.n][received.u].includes(pubkeystr)) return
+                if (!participants[received.n][received.u] || !middleware.participants[received.n][received.u].includes(pubkeystr)) return
                 console.log('received valid chat from',pubkeystr,received)
             } else if (key.length > 0 && key[0].startsWith('alivedb_chat_request/'+config.chat_listener) && keydet.length === 6) {
                 // AliveDB chat participation request received
