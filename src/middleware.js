@@ -59,7 +59,7 @@ GunDB.on('opt',function (ctx) {
                 try {
                     let hash = cg.createHash(received.t,received.u,received.n,received.m,keydet[1],keydet[2],keydet[3])
                     if (received.n === 'dtc')
-                        pubkeystr = cg.avalonEncode(cg.avalonRecoverFromSig(received.s,received.r,hash))
+                        pubkeystr = cg.avalonRecoverFromSig(received.s,received.r,hash)
                     else
                         pubkeystr = cg.Signature.fromString(received.s).recover(hash)
                 } catch { return }
@@ -85,7 +85,7 @@ GunDB.on('opt',function (ctx) {
                             let hash = cg.createHashRequest(received.t,keydet[5],keydet[4],keydet[1],keydet[2],keydet[3])
                             let pubkeystr = ''
                             if (keydet[4] === 'dtc')
-                                pubkeystr = cg.avalonEncode(cg.avalonRecoverFromSig(received.s,received.r,hash))
+                                pubkeystr = cg.avalonRecoverFromSig(received.s,received.r,hash)
                             else
                                 pubkeystr = cg.Signature.fromString(received.s).recover(hash)
                             validKeys = await getAccountKeys(keydet[5],keydet[4])

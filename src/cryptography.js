@@ -25,6 +25,20 @@ function createHashRequest(ts,username,network,streamNetwork,streamer,streamLink
     return sha256('alivedb_chat_request'+'_'+ts+'_'+username+'_'+network+'_'+streamNetwork+'/'+streamer+'/'+streamLink)
 }
 
+function avalonRecoverFromSig(sig,recid,msg) {
+    return bs58.encode(secp256k1.ecdsaRecover(bs58.decode(sig),recid,msg))
+}
+
+function avalonSign(key,hash) {
+    if (typeof key === 'string')
+        key = bs58.decode(key)
+    let sig = secp256k1.ecdsaSign(hash,key)
+    return {
+        signature: bs58.encode(sig.signature),
+        recid: sig.recid
+    }
+}
+
 function grapheneEncodePub(key,prefix = 'STM') {
     const checksum = ripemd160(key)
     return prefix + bs58.encode(Buffer.concat([key,checksum.slice(0,4)]))
@@ -33,26 +47,6 @@ function grapheneEncodePub(key,prefix = 'STM') {
 function grapheneDecodeWif(key) {
     const buffer = bs58.decode(key)
     return buffer.slice(0, -4).slice(1)
-}
-
-function avalonEncode(key) {
-    return bs58.encode(key)
-}
-
-function avalonDecode(key) {
-    return bs58.decode(key)
-}
-
-function avalonRecoverFromSig(sig,recid,msg) {
-    return secp256k1.ecdsaRecover(bs58.decode(sig),recid,msg)
-}
-
-function avalonSign(key,hash) {
-    let sig = secp256k1.ecdsaSign(hash,key)
-    return {
-        signature: bs58.encode(sig.signature),
-        recid: sig.recid
-    }
 }
 
 function grapheneSign(key,hash) {
@@ -118,11 +112,9 @@ class Signature {
     }
 }
 
-module.exports = {
+let cg = {
     grapheneEncodePub,
     grapheneDecodeWif,
-    avalonEncode,
-    avalonDecode,
     avalonRecoverFromSig,
     createHash,
     createHashRequest,
@@ -130,3 +122,8 @@ module.exports = {
     grapheneSign,
     Signature
 }
+
+if (typeof window !== 'undefined')
+    window.cg = cg
+else
+    module.exports = cg
