@@ -37,6 +37,7 @@ AliveDB can be configured using command line args or env vars. Command line args
 |`--peers`|`ALIVEDB_PEERS`|List of bootstrap peers *(comma-seperated)*||
 |`--http_port`|`ALIVEDB_HTTP_PORT`|HTTP port|3006|
 |`--gun_port`|`ALIVEDB_GUN_PORT`|Gun P2P port|3007|
+|`--chat_listener`|`ALIVEDB_CHAT_LISTENER`|Stream link for participant auto-authorization. Format: `network/username/link`||
 
 ## HTTP API
 
@@ -67,6 +68,23 @@ curl -s --header "Content-Type: application/json" --data '{"pub":"a4DAmyHA23xjuL
 
 {
     "success": true
+}
+```
+
+### Fetch stream participants
+```
+curl -s http://localhost:3006/fetchParticipantsKeys | jq
+
+{
+    "dtc": {
+        "techcoderx": [
+            "2A2No4SzEG1k3YyKnQ2CBtrDXoMmeSqsfjs6AvDVMV8TA",
+            "g1mUHD7s8U7yvAoJPT5xpG5VXg1zqFKBiLU6PGm6T3Ee",
+            "2AoapLZKcoCP9etJndt3TxaEW4EbMuJ8D4AtBrGDKKjjY"
+        ]
+    },
+    "hive": {},
+    "steem": {}
 }
 ```
 
