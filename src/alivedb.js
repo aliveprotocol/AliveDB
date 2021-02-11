@@ -63,6 +63,9 @@ let db = {
                 hive: [],
                 steem: []
             }
+            let listenerArr = Config.chat_listener.split('/')
+            if (listenerArr.length === 3)
+                Gun.user(pub).get(listId+'/participants').get(listenerArr[0]).get(listenerArr[1]).put(1)
             Gun.user(pub).get(listId+'/participants').once(async (nets) => {
                 if (!nets) rs(result)
                 for (let n in nets) if (n !== '_' && result[n]) {
