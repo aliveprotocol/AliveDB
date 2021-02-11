@@ -52,7 +52,7 @@ GunDB.on('opt',function (ctx) {
                 if (!received.u || !received.n || !received.s || (received.n === 'dtc' && !received.r && received.r !== 0) || !received.t || !received.m) return
                 if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return
                 if (!middleware.participants[received.n] || (config.chat_listener && !middleware.participants[received.n][received.u])) return
-                if (Math.abs(received.t - received._['>'].t) > 5000) return
+                if (Math.abs(received.t - received._['>'].t) > 30000) return
 
                 // Recover public key from message signature
                 let pubkeystr = ''
@@ -78,7 +78,7 @@ GunDB.on('opt',function (ctx) {
                 if (typeof received.s !== 'string' || typeof received.t !== 'number') return
                 if (!middleware.participants[keydet[4]]) return
                 if (keydet[4] === 'dtc' && !received.r && received.r !== 0 && typeof received.r !== 'number') return
-                if (Math.abs(received.t - received._['>'].t) > 5000) return
+                if (Math.abs(received.t - received._['>'].t) > 30000) return
                 if (Math.abs(received.t - new Date().getTime() > 10000)) return
                 gunUser.get(config.chat_listener+'/participants').get(keydet[4]).get(keydet[5]).once(async (val) => {
                     if (!val && val !== 0) {
