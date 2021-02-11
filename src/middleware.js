@@ -113,10 +113,10 @@ function getAccountKeys(user,network) {
         // todo blockchain api config
         if (network === 'dtc')
             axios.get('https://avalon.oneloved.tube/account/'+user).then((d) => {
-                // Allow master key and type 4 custom keys
+                // Allow master key and type 4 and 13 custom keys
                 let allowedKeys = [d.data.pub]
                 for (let i in d.data.keys)
-                    if (d.data.keys[i].types.includes(4))
+                    if (d.data.keys[i].types.includes(4) || d.data[i].keys[j].types.includes(13))
                         allowedKeys.push(d.data.keys[i].pub)
                 middleware.participants.dtc[user] = allowedKeys
                 rs(allowedKeys)
@@ -160,11 +160,11 @@ function getAccountKeysMulti(users) {
                 try {
                     d = await axios.get('https://avalon.oneloved.tube/accounts/'+users.dtc.join(','))
                 } catch { continue }
-                // Allow master key and type 4 custom keys
+                // Allow master key and type 4 and 13 custom keys
                 for (let i = 0; i < d.data.length; i++) {
                     let allowedKeys = [d.data[i].pub]
                     for (let j in d.data[i].keys)
-                        if (d.data[i].keys[j].types.includes(4))
+                        if (d.data[i].keys[j].types.includes(4) || d.data[i].keys[j].types.includes(13))
                             allowedKeys.push(d.data[i].keys[j].pub)
                     results.dtc[d.data[i].name] = allowedKeys
                 }
