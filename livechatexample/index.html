@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+    <head>
+        <title>AliveDB live chat</title>
+        <style>
+            h3 { margin-block-end: 0.2em; }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+        <script src="https://unpkg.com/axios@0.21.1/dist/axios.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+        <script src="cg.js"></script>
+        <script src="middleware.js"></script>
+        <script src="chat.js"></script>
+    </head>
+    <body>
+        <h1 id="chattitle">AliveDB live chat</h1>
+        <button type="button" onclick="localStorage.clear(); sessionStorage.clear(); alert('storage cleared!')">Clear storage</button>
+        <h3>User info</h3>
+        <select id="usernetworkselect" style="width: 60px;">
+            <option>dtc</option>
+            <option>hive</option>
+            <option>steem</option>
+        </select>
+        <input placeholder="Username" id="usernameinput">
+        <input placeholder="Private Key (if not using Keychain)" id="keyinput" type="password" style="width: 220px;"><br>
+        <h3>Stream info</h3>
+        <input placeholder="AliveDB Public Key" id="streameralivedbpub" style="width: 440px; margin-bottom: 10px;">
+        <button type="button" onclick="requestAccess()" id="chataccessbtn">Request Access</button><br>
+        <select id="streamnetworkselect" style="width: 60px;">
+            <option>dtc</option>
+            <option>hive</option>
+        </select>
+        <input placeholder="Streamer" id="streamerinput">
+        <input placeholder="Link" id="linkinput" style="width: 220px;">
+        <button type="button" onclick="loadChat()">Load</button><br><br><br>
+        <input placeholder="Chat message here..." id="chatmsginput" onkeypress="chatEnter()" style="width: 440px;">
+        <button type="button" onclick="sendChatMessage()">Send</button><br><br>
+        <div id="messages"></div>
+    </body>
+</html>
