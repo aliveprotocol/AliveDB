@@ -25,6 +25,9 @@ let middleware = {
     getAccountKeysMulti
 }
 
+const allowedMsgFields = ['_','u','n','s','r','t','m']
+const allowedReqFields = ['_','s','r','t']
+
 GunDB.on('opt',function (ctx) {
     if (ctx.once) return
     this.to.next(ctx)
@@ -54,6 +57,9 @@ GunDB.on('opt',function (ctx) {
                 if (!middleware.participants[received.n] || (config.chat_listener && !middleware.participants[received.n][received.u])) return
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
 
+                // unknown fields are rejected
+                for (let fields in received) if (!allowedMsgFields.includes(fields)) return
+
                 // Recover public key from message signature
                 let pubkeystr = ''
                 try {
@@ -70,16 +76,17 @@ GunDB.on('opt',function (ctx) {
                 // This means having ALIVEDB_CHAT_LISTENER on streamers end.
                 if (config.chat_listener && (!middleware.participants[received.n][received.u] || !middleware.participants[received.n][received.u].includes(pubkeystr))) return
                 console.log('received valid chat from',pubkeystr,received)
-            } else if (key.length > 0 && key[0].startsWith('alivedb_chat_request/'+config.chat_listener) && keydet.length === 6) {
+            } else if (config.chat_listener && key.length > 0 && key[0].startsWith('alivedb_chat_request/'+config.chat_listener) && keydet.length === 6) {
                 // AliveDB chat participation request received
                 // Format should be alivedb_chat_request/stream_network/streamer/link/participant_network/participant_username
                 if (!gunUser || !gunUser.is) return
                 if (!received.s || !received.t) return
-                if (typeof received.s !== 'string' || typeof received.t !== 'number') return
+                if (typeof received.s !== 'string' || typeof received.t !== 'number' || (received.r && typeof received.r !== 'number')) return
                 if (!middleware.participants[keydet[4]]) return
                 if (keydet[4] === 'dtc' && !received.r && received.r !== 0 && typeof received.r !== 'number') return
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
                 if (Math.abs(received.t - new Date().getTime() > 10000)) return
+                for (let fields in received) if (!allowedReqFields.includes(fields)) return
                 gunUser.get(config.chat_listener+'/participants').get(keydet[4]).get(keydet[5]).once(async (val) => {
                     if (!val && val !== 0) {
                         // Verify signature

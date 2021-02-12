@@ -1,6 +1,8 @@
 // Same middleware file as in AliveDB but striped down for browsers.
 
 // To use this middleware, import this file right after importing gundb.
+const allowedMsgFields = ['_','u','n','s','r','t','m']
+
 Gun.on('opt',function (ctx) {
     if (ctx.once) return
     this.to.next(ctx)
@@ -29,6 +31,9 @@ Gun.on('opt',function (ctx) {
                 if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return
                 if (!participants[received.n]) return
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
+
+                // Unknown fields are rejected
+                for (let fields in received) if (!allowedMsgFields.includes(fields)) return
 
                 // Recover public key from message signature
                 let pubkeystr = ''
