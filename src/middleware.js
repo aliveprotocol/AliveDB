@@ -75,7 +75,7 @@ GunDB.on('opt',function (ctx) {
                 // as it does not have access to public keys of all live chat rooms in existence.
                 // This means having ALIVEDB_CHAT_LISTENER on streamers end.
                 if (config.chat_listener && (!middleware.participants[received.n][received.u] || !middleware.participants[received.n][received.u].includes(pubkeystr))) return
-                console.log('received valid chat from',pubkeystr,received)
+                // console.log('received valid chat from',pubkeystr,received)
             } else if (config.chat_listener && key.length > 0 && key[0].startsWith('alivedb_chat_request/'+config.chat_listener) && keydet.length === 6) {
                 // AliveDB chat participation request received
                 // Format should be alivedb_chat_request/stream_network/streamer/link/participant_network/participant_username
@@ -102,8 +102,8 @@ GunDB.on('opt',function (ctx) {
                             if (!validKeys.includes(pubkeystr)) return
                         } catch (e) { return }
                         gunUser.get(config.chat_listener+'/participants').get(keydet[4]).get(keydet[5]).put(1,(ack) => {
-                            if (ack.ok) console.log('Successfully approved',keydet[5],keydet[4])
-                            middleware.participants[keydet[4]][keydet[5]] = validKeys
+                            if (ack.ok) //console.log('Successfully approved',keydet[5],keydet[4])
+                                middleware.participants[keydet[4]][keydet[5]] = validKeys
                         })
                     } else if (val === 0) {
                         // Banned user

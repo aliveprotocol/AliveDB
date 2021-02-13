@@ -87,9 +87,7 @@ let db = {
         Gun.get('alivedb_chat_request/'+Config.chat_listener+'/'+network).on((d) => {
             let k = Object.keys(d._['>'])
             for (let l in k)
-                Gun.get(d[k[l]]['#']).on((f)=>{
-                    console.log(f)
-                })
+                Gun.get(d[k[l]]['#']).on(()=>{})
         })
     },
     getListFromUser: (pub,listId,retainGunInfo,minTs) => {

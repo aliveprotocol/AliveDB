@@ -92,8 +92,8 @@ function approveParticipant(network,user,validKeys,alrt) {
                 alert('Successfully approved',user,network)
             else
                 console.log('Successfully approved',user,network)
+            participants[network][user] = validKeys
         }
-        participants[network][user] = validKeys
     })
 }
 
