@@ -33,9 +33,23 @@
         </select>
         <input placeholder="Streamer" id="streamerinput">
         <input placeholder="Link" id="linkinput" style="width: 220px;">
-        <button type="button" onclick="loadChat()">Load</button><br><br><br>
+        <button type="button" onclick="loadChat()">Load</button><br>
+        <h3>Moderation</h3>
+        <input placeholder="AliveDB Chat Moderator Password" id="moderatorpsw" type="password" style="width: 440px; margin-bottom: 10px;">
+        <button type="button" onclick="modLogin()" id="moderatorloginbtn">Login</button>
+        <div id="modZone" style="display: none;">
+            <select id="modApprNetwork" style="width: 60px;">
+                <option>dtc</option>
+                <option>hive</option>
+                <option>steem</option>
+            </select>
+            <input placeholder="Username" id="modApprUser" style="width: 375px;">
+            <button type="button" onclick="approveUserBtn()">Approve User</button>
+            <button type="button" onclick="blacklistUserBtn()">Blacklist User</button>
+        </div>
+        <br><br>
         <input placeholder="Chat message here..." id="chatmsginput" onkeypress="chatEnter()" style="width: 440px;">
-        <button type="button" onclick="sendChatMessage()">Send</button><br><br>
+        <button type="button" id="sendMsgBtn" onclick="sendChatMessage()">Send</button><br><br>
         <div id="messages"></div>
     </body>
 </html>

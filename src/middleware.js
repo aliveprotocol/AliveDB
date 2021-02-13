@@ -105,6 +105,11 @@ GunDB.on('opt',function (ctx) {
                             if (ack.ok) console.log('Successfully approved',keydet[5],keydet[4])
                             middleware.participants[keydet[4]][keydet[5]] = validKeys
                         })
+                    } else if (val === 0) {
+                        // Banned user
+                        if (middleware.participants[keydet[4]][keydet[5]])
+                            delete middleware.participants[keydet[4]][keydet[5]]
+                        return
                     }
                 })
             }
@@ -123,7 +128,7 @@ function getAccountKeys(user,network) {
                 // Allow master key and type 4 and 13 custom keys
                 let allowedKeys = [d.data.pub]
                 for (let i in d.data.keys)
-                    if (d.data.keys[i].types.includes(4) || d.data[i].keys[j].types.includes(13))
+                    if (d.data.keys[i].types.includes(4) || d.data.keys[i].types.includes(13))
                         allowedKeys.push(d.data.keys[i].pub)
                 middleware.participants.dtc[user] = allowedKeys
                 rs(allowedKeys)

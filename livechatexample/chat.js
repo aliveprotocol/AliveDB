@@ -1,4 +1,5 @@
 let gundb = new Gun(['http://localhost:3007/gun'])
+let gundbMod = gundb.user()
 let participants = {
     dtc: {},
     hive: {},
@@ -99,9 +100,22 @@ async function streamParticipantsHandler(nets,network,currentEv) {
     console.log('STREAM PARTICIPANTS',network,nets)
     authEvs[network] = currentEv
     let newParticipants = []
-    // todo resolve bans
-    for (let u in nets) if (u !== '_' && nets[u] !== 0 && !participants[network][u])
-        newParticipants.push(u)
+    for (let u in nets) {
+        if (u !== '_' && nets[u] !== 0 && !participants[network][u]) {
+            newParticipants.push(u)
+            if (network === document.getElementById('usernetworkselect').value && u === document.getElementById('usernameinput').value) {
+                document.getElementById('chatmsginput').disabled = false
+                document.getElementById('sendMsgBtn').disabled = false
+            }
+        } else if (u !== '_' && nets[u] === 0 && participants[network][u]) {
+            // a user got banned
+            delete participants[network][u]
+            if (network === document.getElementById('usernetworkselect').value && u === document.getElementById('usernameinput').value) {
+                document.getElementById('chatmsginput').disabled = true
+                document.getElementById('sendMsgBtn').disabled = true
+            }
+        }
+    }
     let req = {}
     req[network] = newParticipants
     let newKeys = await getAccountKeysMulti(req,false)
@@ -168,6 +182,8 @@ async function loadChat() {
         steem: {}
     }
     document.getElementById('messages').innerText = ''
+    document.getElementById('chatmsginput').disabled = false
+    document.getElementById('sendMsgBtn').disabled = false
     if (ev && ev.off && typeof ev.off === 'function') ev.off()
     for (let i in authEvs) if (authEvs[i] && authEvs[i].off && typeof authEvs[i].off === 'function') authEvs[i].off()
     await refreshAccess(false,document.getElementById('usernameinput').value,document.getElementById('usernetworkselect').value)
@@ -247,7 +263,7 @@ function keychainSign(ts,username,network,msg,streamNetwork,streamer,streamLink)
         stringified = ts+'_'+username+'_'+network+'_'+msg+'_'+streamNetwork+'/'+streamer+'/'+streamLink
     else
         stringified = 'alivedb_chat_request'+'_'+ts+'_'+username+'_'+network+'_'+streamNetwork+'/'+streamer+'/'+streamLink
-    return new Promise((rs) => {
+    return new Promise((rs,rj) => {
         if (network === 'steem' && !window.steem_keychain) return rj('Steem Keychain is not installed')
         if (network === 'hive' && !window.hive_keychain) return rj('Hive Keychain is not installed')
         let kcext = network === 'hive' ? window.hive_keychain : window.steem_keychain
@@ -257,6 +273,55 @@ function keychainSign(ts,username,network,msg,streamNetwork,streamer,streamLink)
             rs(result.result)
         })
     })
+}
+
+async function modLogin() {
+    let id = await getIdFromPub()
+    if (!id)
+        return alert('Account for AliveDB public key does not exist')
+    gundbMod.auth(id,document.getElementById('moderatorpsw').value,(r) => {
+        if (r.err)
+            return alert(r.err)
+        document.getElementById('moderatorpsw').style.display = 'none'
+        document.getElementById('moderatorloginbtn').style.display = 'none'
+        document.getElementById('modZone').style.display = 'block'
+        subRequests('dtc')
+        subRequests('hive')
+        subRequests('steem')
+    })
+}
+
+async function approveUserBtn() {
+    if (!document.getElementById('modApprUser').value) return alert('Target username is required')
+    let keys = await getAccountKeys(document.getElementById('modApprUser').value,document.getElementById('modApprNetwork').value)
+    approveParticipant(document.getElementById('modApprNetwork').value,document.getElementById('modApprUser').value,keys,true)
+}
+
+async function blacklistUserBtn() {
+    if (!document.getElementById('modApprUser').value) return alert('Target username is required')
+    blacklistParticipant(document.getElementById('modApprNetwork').value,document.getElementById('modApprUser').value,true)
+}
+
+function subRequests(network) {
+    gundb.get('alivedb_chat_request/'+getLinkPath()+'/'+network).on((d) => {
+        let k = Object.keys(d._['>'])
+        for (let l in k) gundb.get(d[k[l]]['#']).on(()=>{})
+    })
+}
+
+function getIdFromPub() {
+    return new Promise((rs,rj) => {
+        gundb.user(document.getElementById('streameralivedbpub').value).once((u) => {
+            if (u && u.alias)
+                rs(u.alias)
+            else
+                rs(null)
+        })
+    })
+}
+
+function getLinkPath() {
+    return document.getElementById('streamnetworkselect').value+'/'+document.getElementById('streamerinput').value+'/'+document.getElementById('linkinput').value
 }
 
 function getGunChatPath() {
@@ -280,7 +345,7 @@ function getGunChatRequestPath() {
 function getGunChatAuthPath() {
     return gundb
         .user(document.getElementById('streameralivedbpub').value)
-        .get(document.getElementById('streamnetworkselect').value+'/'+document.getElementById('streamerinput').value+'/'+document.getElementById('linkinput').value+'/participants')
+        .get(getLinkPath()+'/participants')
 }
 
 function getGunItem(itemId) {
