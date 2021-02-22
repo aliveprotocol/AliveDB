@@ -94,6 +94,8 @@ function streamParticipants() {
     getGunChatAuthPath().get('dtc').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'dtc',currentEv))
     getGunChatAuthPath().get('hive').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'hive',currentEv))
     getGunChatAuthPath().get('steem').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'steem',currentEv))
+    if (document.getElementById('streamnetworkselect').value === 'hive' && document.getElementById('streamerinput').value)
+        streamHiveBlacklistedUsers(document.getElementById('streamerinput').value)
 }
 
 async function streamParticipantsHandler(nets,network,currentEv) {
@@ -175,6 +177,12 @@ function getAccountKeysMulti(users,fetchAll) {
 }
 
 async function loadChat() {
+    if (!document.getElementById('streamerinput').value)
+        return alert('Streamer username is required')
+    else if (!document.getElementById('linkinput').value)
+        return alert('Link is required') 
+    else if (!document.getElementById('streameralivedbpub').value)
+        return alert('AliveDB public key is required')
     msgs = {}
     participants = {
         dtc: {},
@@ -184,6 +192,7 @@ async function loadChat() {
     document.getElementById('messages').innerText = ''
     document.getElementById('chatmsginput').disabled = false
     document.getElementById('sendMsgBtn').disabled = false
+    stopStreamHiveBlacklistedUsers()
     if (ev && ev.off && typeof ev.off === 'function') ev.off()
     for (let i in authEvs) if (authEvs[i] && authEvs[i].off && typeof authEvs[i].off === 'function') authEvs[i].off()
     await refreshAccess(false,document.getElementById('usernameinput').value,document.getElementById('usernetworkselect').value)

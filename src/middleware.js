@@ -21,8 +21,11 @@ let middleware = {
         hive: {},
         steem: {}
     },
+    hiveBlacklistedUsers: [],
+    hiveBlacklistedUsers: null,
     getAccountKeys,
-    getAccountKeysMulti
+    getAccountKeysMulti,
+    streamHiveBlacklistedUsers
 }
 
 const allowedMsgFields = ['_','u','n','s','r','t','m']
@@ -60,6 +63,9 @@ GunDB.on('opt',function (ctx) {
                 // unknown fields are rejected
                 for (let fields in received) if (!allowedMsgFields.includes(fields)) return
 
+                // Exclude blacklisted users on Hive (if any)
+                if (received.n === 'hive' && middleware.hiveBlacklistedUsers.includes(received.u)) return
+
                 // Recover public key from message signature
                 let pubkeystr = ''
                 try {
@@ -87,6 +93,7 @@ GunDB.on('opt',function (ctx) {
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
                 if (Math.abs(received.t - new Date().getTime() > 10000)) return
                 for (let fields in received) if (!allowedReqFields.includes(fields)) return
+                if (keydet[4] === 'hive' && middleware.hiveBlacklistedUsers.includes(keydet[5])) return
                 gunUser.get(config.chat_listener+'/participants').get(keydet[4]).get(keydet[5]).once(async (val) => {
                     if (!val && val !== 0) {
                         // Verify signature
@@ -206,6 +213,30 @@ function getAccountKeysMulti(users) {
         }
         rs(results)
     })
+}
+
+function getHiveBlacklistedUsers(hiveUser) {
+    return new Promise((rs,rj) => {
+        axios.post('https://techcoderx.com',{
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'bridge.get_follow_list',
+            params: {
+                observer: hiveUser,
+                follow_type: 'blacklisted'
+            }
+        }).then((d) => {
+            if (d.data.error) return rj(d.data.error)
+            let result = []
+            for (let i in d.data.result) result.push(d.data.result[i].name)
+            rs(result)
+        }).catch(rj)
+    })
+}
+
+async function streamHiveBlacklistedUsers(hiveUser) {
+    middleware.hiveBlacklistedUsers = await getHiveBlacklistedUsers(hiveUser)
+    middleware.hiveBlacklistedUsersInterval = setInterval(async () => middleware.hiveBlacklistedUsers = await getHiveBlacklistedUsers(hiveUser),15000)
 }
 
 module.exports = middleware

@@ -80,6 +80,9 @@ let db = {
                 db.subRequests('dtc')
                 db.subRequests('hive')
                 db.subRequests('steem')
+                // Subscribe to Hive decentralized blacklists if network is 'hive'
+                if (listenerArr[0] === 'hive')
+                    middleware.streamHiveBlacklistedUsers(listenerArr[1])
             })
         })
     },

@@ -4,6 +4,9 @@
 const allowedMsgFields = ['_','u','n','s','r','t','m']
 const allowedReqFields = ['_','s','r','t']
 
+let blacklistedUsersHiveInterval = null
+let blacklistedUsersHive = []
+
 Gun.on('opt',function (ctx) {
     if (ctx.once) return
     this.to.next(ctx)
@@ -36,6 +39,9 @@ Gun.on('opt',function (ctx) {
                 // Unknown fields are rejected
                 for (let fields in received) if (!allowedMsgFields.includes(fields)) return
 
+                // Exclude blacklisted users on Hive (if any)
+                if (received.n === 'hive' && blacklistedUsersHive.includes(received.u)) return
+
                 // Recover public key from message signature
                 let pubkeystr = ''
                 try {
@@ -56,6 +62,7 @@ Gun.on('opt',function (ctx) {
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
                 if (Math.abs(received.t - new Date().getTime() > 10000)) return
                 for (let fields in received) if (!allowedReqFields.includes(fields)) return
+                if (keydet[4] === 'hive' && blacklistedUsersHive.includes(keydet[5])) return
                 gundbMod.get(getLinkPath()+'/participants').get(keydet[4]).get(keydet[5]).once(async (val) => {
                     if (!val && val !== 0) {
                         // Verify signature
@@ -146,4 +153,33 @@ function getAccountKeys(user,network) {
             }).catch(rj)
         }
     })
+}
+
+function getHiveBlacklistedUsers(hiveUser) {
+    return new Promise((rs,rj) => {
+        axios.post('https://techcoderx.com',{
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'bridge.get_follow_list',
+            params: {
+                observer: hiveUser,
+                follow_type: 'blacklisted'
+            }
+        }).then((d) => {
+            if (d.data.error) return rj(d.data.error)
+            let result = []
+            for (let i in d.data.result) result.push(d.data.result[i].name)
+            rs(result)
+        }).catch(rj)
+    })
+}
+
+async function streamHiveBlacklistedUsers(hiveUser) {
+    blacklistedUsersHive = await getHiveBlacklistedUsers(hiveUser)
+    blacklistedUsersHiveInterval = setInterval(async () => blacklistedUsersHive = await getHiveBlacklistedUsers(hiveUser),15000)
+}
+
+function stopStreamHiveBlacklistedUsers() {
+    clearInterval(blacklistedUsersHiveInterval)
+    blacklistedUsersHive = []
 }
