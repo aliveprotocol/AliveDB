@@ -4,7 +4,7 @@ Off-chain GunDB database for Alive streams and live chat messages.
 
 ## Overview
 
-This package provides the core implementation of the database schematics of AliveDB along with the APIs to interact with it. It is used in [Alive-CLI](https://github.com/aliveprotocol/Alive-CLI) to perform authenticated tasks such as publishing stream chunk hashes to off-chain cache. It can also act as a standalone AliveDB GUN relay peer, although this is usually bundled with Avalon and [HAlive](https://github.com/aliveprotocol/HAlive).
+This package provides the core implementation of the database schematics of AliveDB along with the APIs to interact with it. It is used in [Alive-CLI](https://github.com/aliveprotocol/Alive-CLI) to perform authenticated tasks such as publishing .ts segment hashes to off-chain cache. It can also act as a standalone AliveDB GUN relay peer, although this is usually bundled with Avalon and [HAlive](https://github.com/aliveprotocol/HAlive).
 
 Most applications should only use a reduced implementation of [alivedb.js](https://github.com/aliveprotocol/AliveDB/blob/master/src/alivedb.js).
 
