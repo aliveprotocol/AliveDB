@@ -4,7 +4,8 @@
   "description": "Off-chain GunDB database for Alive protocol streams",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "build": "pkg src/index.js --output=dist/alivedb --target=node16"
   },
   "author": "techcoderx",
   "license": "MIT",
@@ -18,5 +19,11 @@
     "is-ipfs": "^2.0.0",
     "secp256k1": "^4.0.2",
     "yargs": "^16.1.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.3.3"
+  },
+  "pkg": {
+    "scripts": "src/**"
   }
 }
