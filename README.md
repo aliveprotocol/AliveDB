@@ -27,6 +27,11 @@ git submodule add https://github.com/aliveprotocol/AliveDB [submodule_dir]
 npm start
 ```
 
+### Compile as self-contained executable
+```
+npm run build
+```
+
 ## Configuration
 
 AliveDB can be configured using command line args or env vars. Command line args takes precedence over env vars.
