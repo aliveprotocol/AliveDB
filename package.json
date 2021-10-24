@@ -16,9 +16,10 @@
     "bs58": "^4.0.1",
     "crypto-js": "^4.0.0",
     "express": "^4.17.1",
-    "gun": "git+https://github.com/amark/gun.git",
+    "gun": "github:amark/gun",
     "is-ipfs": "^2.0.0",
     "secp256k1": "^4.0.2",
+    "text-encoding": "^0.7.0",
     "yargs": "^16.1.0"
   },
   "devDependencies": {
