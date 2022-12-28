@@ -89,7 +89,7 @@ curl -s http://localhost:3006/fetchParticipantsKeys | jq
         ]
     },
     "hive": {},
-    "steem": {}
+    "blurt": {}
 }
 ```
 

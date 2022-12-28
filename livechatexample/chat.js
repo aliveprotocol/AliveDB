@@ -3,14 +3,14 @@ let gundbMod = gundb.user()
 let participants = {
     dtc: {},
     hive: {},
-    steem: {}
+    blurt: {}
 }
 let msgs = {}
 let ev = false
 let authEvs = {
     dtc: false,
     hive: false,
-    steem: false
+    blurt: false
 }
 let authorized = false
 let lastAccess = new Date().getTime()
@@ -23,7 +23,7 @@ async function requestAccess() {
     let streamNetwork = document.getElementById('streamnetworkselect').value
     let streamer = document.getElementById('streamerinput').value
     let link = document.getElementById('linkinput').value
-    if (!user || (network === 'dtc' && !key) || (network === 'steem' && !key && !window.steem_keychain) || (network === 'hive' && !key && !window.hive_keychain)) return alert('username and key is required')
+    if (!user || (network === 'dtc' && !key) || (network === 'blurt' && !key && !window.blurt_keychain) || (network === 'hive' && !key && !window.hive_keychain)) return alert('username and key is required')
     if (await refreshAccess(true,user,network)) return
     let hash = cg.createHashRequest(ts,user,network,streamNetwork,streamer,link)
     let sign
@@ -74,7 +74,7 @@ function fetchParticipants() {
         let toFetch = {
             dtc: [],
             hive: [],
-            steem: []
+            blurt: []
         }
         getGunChatAuthPath().once(async (nets) => {
             if (!nets) rs(participants)
@@ -93,7 +93,7 @@ function fetchParticipants() {
 function streamParticipants() {
     getGunChatAuthPath().get('dtc').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'dtc',currentEv))
     getGunChatAuthPath().get('hive').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'hive',currentEv))
-    getGunChatAuthPath().get('steem').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'steem',currentEv))
+    getGunChatAuthPath().get('blurt').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'blurt',currentEv))
     if (document.getElementById('streamnetworkselect').value === 'hive' && document.getElementById('streamerinput').value)
         streamHiveBlacklistedUsers(document.getElementById('streamerinput').value)
 }
@@ -130,7 +130,7 @@ function getAccountKeysMulti(users,fetchAll) {
         let results = {
             dtc: {},
             hive: {},
-            steem: {}
+            blurt: {}
         }
         for (let nets in users) {
             if (!Array.isArray(users[nets]) || users[nets].length === 0) continue
@@ -149,7 +149,7 @@ function getAccountKeysMulti(users,fetchAll) {
                     results.dtc[d.data[i].name] = allowedKeys
                 }
             } else {
-                let rpc = nets === 'hive' ? 'https://techcoderx.com' : 'https://api.steemit.com'
+                let rpc = nets === 'hive' ? 'https://techcoderx.com' : 'https://blurt-rpc.saboin.com'
                 try {
                     d = await axios.post(rpc,{
                         id: 1,
@@ -187,7 +187,7 @@ async function loadChat() {
     participants = {
         dtc: {},
         hive: {},
-        steem: {}
+        blurt: {}
     }
     document.getElementById('messages').innerText = ''
     document.getElementById('chatmsginput').disabled = false
@@ -241,7 +241,7 @@ async function sendChatMessage() {
     let streamer = document.getElementById('streamerinput').value
     let link = document.getElementById('linkinput').value
     if (!message) return
-    if (!user || (network === 'dtc' && !key) || (network === 'steem' && !key && !window.steem_keychain) || (network === 'hive' && !key && !window.hive_keychain)) return alert('username and key is required')
+    if (!user || (network === 'dtc' && !key) || (network === 'blurt' && !key && !window.blurt_keychain) || (network === 'hive' && !key && !window.hive_keychain)) return alert('username and key is required')
     let hash = cg.createHash(ts,user,network,message,streamNetwork,streamer,link)
     let sign
     if (network === 'dtc')
@@ -273,9 +273,9 @@ function keychainSign(ts,username,network,msg,streamNetwork,streamer,streamLink)
     else
         stringified = 'alivedb_chat_request'+'_'+ts+'_'+username+'_'+network+'_'+streamNetwork+'/'+streamer+'/'+streamLink
     return new Promise((rs,rj) => {
-        if (network === 'steem' && !window.steem_keychain) return rj('Steem Keychain is not installed')
+        if (network === 'blurt' && !window.blurt_keychain) return rj('Blurt Keychain is not installed')
         if (network === 'hive' && !window.hive_keychain) return rj('Hive Keychain is not installed')
-        let kcext = network === 'hive' ? window.hive_keychain : window.steem_keychain
+        let kcext = network === 'hive' ? window.hive_keychain : window.blurt_keychain
         kcext.requestSignBuffer(username,stringified,'Posting',(result) => {
             console.log('KC SIGN',result)
             if (!result.success) return rj(result.error)
@@ -296,7 +296,7 @@ async function modLogin() {
         document.getElementById('modZone').style.display = 'block'
         subRequests('dtc')
         subRequests('hive')
-        subRequests('steem')
+        subRequests('blurt')
     })
 }
 

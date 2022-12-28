@@ -2,7 +2,7 @@ const cg = require('../src/cryptography')
 const GunDB = require('gun')
 const Gun = GunDB({ peers: ['http://localhost:3007/gun'], file: 'radata2' })
 
-let message = 'hello from randomvlogs steem 2'
+let message = 'hello from randomvlogs blurt 2'
 let username = 'randomvlogs'
 let network = 'hive'
 let key = ''

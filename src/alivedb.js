@@ -61,7 +61,7 @@ let db = {
             let result = {
                 dtc: [],
                 hive: [],
-                steem: []
+                blurt: []
             }
             let listenerArr = Config.chat_listener.split('/')
             if (listenerArr.length === 3)
@@ -79,7 +79,7 @@ let db = {
                 // Subscribe to requests
                 db.subRequests('dtc')
                 db.subRequests('hive')
-                db.subRequests('steem')
+                db.subRequests('blurt')
                 // Subscribe to Hive decentralized blacklists if network is 'hive'
                 if (listenerArr[0] === 'hive')
                     middleware.streamHiveBlacklistedUsers(listenerArr[1])

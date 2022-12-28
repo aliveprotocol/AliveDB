@@ -4,7 +4,7 @@ const Gun = GunDB({ peers: ['http://localhost:3007/gun'], file: 'radata2' })
 
 let alivedb_pk = ''
 
-// let network = 'steem'
+// let network = 'blurt'
 // let user = 'techcoderx'
 // let wif = ''
 let streamNetwork = 'dtc'

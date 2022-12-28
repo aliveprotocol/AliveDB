@@ -19,7 +19,7 @@ let middleware = {
     participants: {
         dtc: {},
         hive: {},
-        steem: {}
+        blurt: {}
     },
     hiveBlacklistedUsers: [],
     hiveBlacklistedUsers: null,
@@ -48,7 +48,7 @@ GunDB.on('opt',function (ctx) {
                 /*
                 {
                     u: 'username',
-                    n: 'network (dtc, hive, steem etc)',
+                    n: 'network (dtc, hive, blurt etc)',
                     s: 'signature',
                     r: recid,
                     t: timestamp,
@@ -141,7 +141,7 @@ function getAccountKeys(user,network) {
                 rs(allowedKeys)
             }).catch(rj)
         else {
-            let rpc = network === 'hive' ? 'https://techcoderx.com' : 'https://api.steemit.com'
+            let rpc = network === 'hive' ? 'https://techcoderx.com' : 'https://blurt-rpc.saboin.com'
             axios.post(rpc,{
                 id: 1,
                 jsonrpc: '2.0',
@@ -171,7 +171,7 @@ function getAccountKeysMulti(users) {
         let results = {
             dtc: {},
             hive: {},
-            steem: {}
+            blurt: {}
         }
         for (let nets in users) {
             let d
@@ -188,7 +188,7 @@ function getAccountKeysMulti(users) {
                     results.dtc[d.data[i].name] = allowedKeys
                 }
             } else {
-                let rpc = nets === 'hive' ? 'https://techcoderx.com' : 'https://api.steemit.com'
+                let rpc = nets === 'hive' ? 'https://techcoderx.com' : 'https://blurt-rpc.saboin.com'
                 try {
                     d = await axios.post(rpc,{
                         id: 1,
