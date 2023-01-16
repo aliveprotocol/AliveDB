@@ -129,9 +129,9 @@ GunDB.on('opt',function (ctx) {
 function getAccountKeys(user,network) {
     return new Promise(async (rs,rj) => {
         if (middleware.participants[network][user]) return rs(middleware.participants[network][user])
-        // todo blockchain api config
+        if (!config[network+'_api']) return rs([])
         if (network === 'avalon')
-            axios.get('https://avalon.oneloved.tube/account/'+user).then((d) => {
+            axios.get(config[network+'_api']+'/account/'+user).then((d) => {
                 // Allow master key and type 4 and 13 custom keys
                 let allowedKeys = [d.data.pub]
                 for (let i in d.data.keys)
@@ -141,7 +141,7 @@ function getAccountKeys(user,network) {
                 rs(allowedKeys)
             }).catch(rj)
         else {
-            let rpc = network === 'hive' ? 'https://techcoderx.com' : 'https://blurt-rpc.saboin.com'
+            let rpc = config[network+'_api']
             axios.post(rpc,{
                 id: 1,
                 jsonrpc: '2.0',
@@ -175,9 +175,10 @@ function getAccountKeysMulti(users) {
         }
         for (let nets in users) {
             let d
+            if (!config[nets+'_api']) continue
             if (nets === 'avalon') {
                 try {
-                    d = await axios.get('https://avalon.oneloved.tube/accounts/'+users.avalon.join(','))
+                    d = await axios.get(config.avalon_api+'/accounts/'+users.avalon.join(','))
                 } catch { continue }
                 // Allow master key and type 4 and 13 custom keys
                 for (let i = 0; i < d.data.length; i++) {
@@ -188,7 +189,7 @@ function getAccountKeysMulti(users) {
                     results.avalon[d.data[i].name] = allowedKeys
                 }
             } else {
-                let rpc = nets === 'hive' ? 'https://techcoderx.com' : 'https://blurt-rpc.saboin.com'
+                let rpc = config[nets+'_api']
                 try {
                     d = await axios.post(rpc,{
                         id: 1,
@@ -217,7 +218,9 @@ function getAccountKeysMulti(users) {
 
 function getHiveBlacklistedUsers(hiveUser) {
     return new Promise((rs,rj) => {
-        axios.post('https://techcoderx.com',{
+        if (!config.hive_api)
+            rs([])
+        axios.post(config.hive_api,{
             id: 1,
             jsonrpc: '2.0',
             method: 'bridge.get_follow_list',

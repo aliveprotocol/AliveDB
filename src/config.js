@@ -7,7 +7,10 @@ let config = {
     peers: [],
     http_port: 3006,
     gun_port: 3007,
-    chat_listener: ''
+    chat_listener: '',
+    hive_api: '',
+    blurt_api: '',
+    avalon_api: ''
 }
 
 // Config overwrites through CLI args or environment vars
