@@ -24,14 +24,14 @@ Gun.on('opt',function (ctx) {
                 /*
                 {
                     u: 'username',
-                    n: 'network (dtc, hive, blurt etc)',
+                    n: 'network (avalon, hive, blurt etc)',
                     s: 'signature',
                     r: recid,
                     t: timestamp,
                     m: 'my chat message goes here'
                 }
                 */
-                if (!received.u || !received.n || !received.s || (received.n === 'dtc' && !received.r && received.r !== 0) || !received.t || !received.m) return
+                if (!received.u || !received.n || !received.s || (received.n === 'avalon' && !received.r && received.r !== 0) || !received.t || !received.m) return
                 if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return
                 if (!participants[received.n]) return
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
@@ -46,7 +46,7 @@ Gun.on('opt',function (ctx) {
                 let pubkeystr = ''
                 try {
                     let hash = cg.createHash(received.t,received.u,received.n,received.m,keydet[1],keydet[2],keydet[3])
-                    if (received.n === 'dtc')
+                    if (received.n === 'avalon')
                         pubkeystr = cg.avalonRecoverFromSig(received.s,received.r,hash)
                     else
                         pubkeystr = cg.Signature.fromString(received.s).recover(hash)
@@ -58,7 +58,7 @@ Gun.on('opt',function (ctx) {
                 if (!received.s || !received.t) return
                 if (typeof received.s !== 'string' || typeof received.t !== 'number' || (received.r && typeof received.r !== 'number')) return
                 if (!participants[keydet[4]]) return
-                if (keydet[4] === 'dtc' && !received.r && received.r !== 0 && typeof received.r !== 'number') return
+                if (keydet[4] === 'avalon' && !received.r && received.r !== 0 && typeof received.r !== 'number') return
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
                 if (Math.abs(received.t - new Date().getTime() > 10000)) return
                 for (let fields in received) if (!allowedReqFields.includes(fields)) return
@@ -70,7 +70,7 @@ Gun.on('opt',function (ctx) {
                         try {
                             let hash = cg.createHashRequest(received.t,keydet[5],keydet[4],keydet[1],keydet[2],keydet[3])
                             let pubkeystr = ''
-                            if (keydet[4] === 'dtc')
+                            if (keydet[4] === 'avalon')
                                 pubkeystr = cg.avalonRecoverFromSig(received.s,received.r,hash)
                             else
                                 pubkeystr = cg.Signature.fromString(received.s).recover(hash)
@@ -120,14 +120,14 @@ function getAccountKeys(user,network) {
     return new Promise(async (rs,rj) => {
         if (participants[network][user]) return rs(participants[network][user])
         // todo blockchain api config
-        if (network === 'dtc')
+        if (network === 'avalon')
             axios.get('https://avalon.oneloved.tube/account/'+user).then((d) => {
                 // Allow master key and type 4 and 13 custom keys
                 let allowedKeys = [d.data.pub]
                 for (let i in d.data.keys)
                     if (d.data.keys[i].types.includes(4) || d.data.keys[i].types.includes(13))
                         allowedKeys.push(d.data.keys[i].pub)
-                participants.dtc[user] = allowedKeys
+                participants.avalon[user] = allowedKeys
                 rs(allowedKeys)
             }).catch(rj)
         else {

@@ -1,14 +1,14 @@
 let gundb = new Gun(['http://localhost:3007/gun'])
 let gundbMod = gundb.user()
 let participants = {
-    dtc: {},
+    avalon: {},
     hive: {},
     blurt: {}
 }
 let msgs = {}
 let ev = false
 let authEvs = {
-    dtc: false,
+    avalon: false,
     hive: false,
     blurt: false
 }
@@ -23,11 +23,11 @@ async function requestAccess() {
     let streamNetwork = document.getElementById('streamnetworkselect').value
     let streamer = document.getElementById('streamerinput').value
     let link = document.getElementById('linkinput').value
-    if (!user || (network === 'dtc' && !key) || (network === 'blurt' && !key && !window.blurt_keychain) || (network === 'hive' && !key && !window.hive_keychain)) return alert('username and key is required')
+    if (!user || (network === 'avalon' && !key) || (network === 'blurt' && !key && !window.blurt_keychain) || (network === 'hive' && !key && !window.hive_keychain)) return alert('username and key is required')
     if (await refreshAccess(true,user,network)) return
     let hash = cg.createHashRequest(ts,user,network,streamNetwork,streamer,link)
     let sign
-    if (network === 'dtc')
+    if (network === 'avalon')
         sign = cg.avalonSign(key,hash)
     else if (!key)
         try {
@@ -36,8 +36,8 @@ async function requestAccess() {
     else
         sign = cg.grapheneSign(key,hash)
     let signed = {
-        s: network === 'dtc' ? sign.signature : sign,
-        r: network === 'dtc' ? sign.recid : undefined,
+        s: network === 'avalon' ? sign.signature : sign,
+        r: network === 'avalon' ? sign.recid : undefined,
         t: ts
     }
     getGunChatRequestPath().put(signed,(ack) => {
@@ -72,7 +72,7 @@ function refreshAccess(alrt,user,network) {
 function fetchParticipants() {
     return new Promise((rs) => {
         let toFetch = {
-            dtc: [],
+            avalon: [],
             hive: [],
             blurt: []
         }
@@ -91,7 +91,7 @@ function fetchParticipants() {
 }
 
 function streamParticipants() {
-    getGunChatAuthPath().get('dtc').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'dtc',currentEv))
+    getGunChatAuthPath().get('avalon').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'avalon',currentEv))
     getGunChatAuthPath().get('hive').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'hive',currentEv))
     getGunChatAuthPath().get('blurt').on(async (nets,nk,at,currentEv) => streamParticipantsHandler(nets,'blurt',currentEv))
     if (document.getElementById('streamnetworkselect').value === 'hive' && document.getElementById('streamerinput').value)
@@ -128,7 +128,7 @@ function getAccountKeysMulti(users,fetchAll) {
     return new Promise(async (rs,rj) => {
         // todo blockchain api config
         let results = {
-            dtc: {},
+            avalon: {},
             hive: {},
             blurt: {}
         }
@@ -136,9 +136,9 @@ function getAccountKeysMulti(users,fetchAll) {
             if (!Array.isArray(users[nets]) || users[nets].length === 0) continue
             if (fetchAll) for (let u in users[nets]) if (participants[nets][users[nets][u]]) users[nets].splice(u,1)
             let d
-            if (nets === 'dtc') {
+            if (nets === 'avalon') {
                 try {
-                    d = await axios.get('https://avalon.oneloved.tube/accounts/'+users.dtc.join(','))
+                    d = await axios.get('https://avalon.oneloved.tube/accounts/'+users.avalon.join(','))
                 } catch { continue }
                 // Allow master key and type 4 and 13 custom keys
                 for (let i = 0; i < d.data.length; i++) {
@@ -146,7 +146,7 @@ function getAccountKeysMulti(users,fetchAll) {
                     for (let j in d.data[i].keys)
                         if (d.data[i].keys[j].types.includes(4) || d.data[i].keys[j].types.includes(13))
                             allowedKeys.push(d.data[i].keys[j].pub)
-                    results.dtc[d.data[i].name] = allowedKeys
+                    results.avalon[d.data[i].name] = allowedKeys
                 }
             } else {
                 let rpc = nets === 'hive' ? 'https://techcoderx.com' : 'https://blurt-rpc.saboin.com'
@@ -185,7 +185,7 @@ async function loadChat() {
         return alert('AliveDB public key is required')
     msgs = {}
     participants = {
-        dtc: {},
+        avalon: {},
         hive: {},
         blurt: {}
     }
@@ -241,10 +241,10 @@ async function sendChatMessage() {
     let streamer = document.getElementById('streamerinput').value
     let link = document.getElementById('linkinput').value
     if (!message) return
-    if (!user || (network === 'dtc' && !key) || (network === 'blurt' && !key && !window.blurt_keychain) || (network === 'hive' && !key && !window.hive_keychain)) return alert('username and key is required')
+    if (!user || (network === 'avalon' && !key) || (network === 'blurt' && !key && !window.blurt_keychain) || (network === 'hive' && !key && !window.hive_keychain)) return alert('username and key is required')
     let hash = cg.createHash(ts,user,network,message,streamNetwork,streamer,link)
     let sign
-    if (network === 'dtc')
+    if (network === 'avalon')
         sign = cg.avalonSign(key,hash)
     else if (!key)
         try {
@@ -255,8 +255,8 @@ async function sendChatMessage() {
     let signed = {
         u: user,
         n: network,
-        s: network === 'dtc' ? sign.signature : sign,
-        r: network === 'dtc' ? sign.recid : undefined,
+        s: network === 'avalon' ? sign.signature : sign,
+        r: network === 'avalon' ? sign.recid : undefined,
         m: message,
         t: ts
     }
@@ -294,7 +294,7 @@ async function modLogin() {
         document.getElementById('moderatorpsw').style.display = 'none'
         document.getElementById('moderatorloginbtn').style.display = 'none'
         document.getElementById('modZone').style.display = 'block'
-        subRequests('dtc')
+        subRequests('avalon')
         subRequests('hive')
         subRequests('blurt')
     })

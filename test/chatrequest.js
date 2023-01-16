@@ -7,7 +7,7 @@ let alivedb_pk = ''
 // let network = 'blurt'
 // let user = 'techcoderx'
 // let wif = ''
-let streamNetwork = 'dtc'
+let streamNetwork = 'avalon'
 let streamer = 'techcoderx'
 let link = 'teststreamchat'
 // let ts = new Date().getTime()
@@ -24,9 +24,9 @@ let link = 'teststreamchat'
 //     Gun.user(alivedb_pk).get(`${streamNetwork}/${streamer}/${link}/participants`).get(network).get(user).on((data) => console.log('response',data))
 // })
 
-// Gun.get('alivedb_chat_request').get('dtc').get('techcoderx').get('teststreamchat').put(5003,(ack) => {
+// Gun.get('alivedb_chat_request').get('avalon').get('techcoderx').get('teststreamchat').put(5003,(ack) => {
 //     console.log('ack ok',ack.ok)
-//     Gun.get('alivedb_chat_request').get('dtc').get('techcoderx').get('teststreamchat2').once((data) => {
+//     Gun.get('alivedb_chat_request').get('avalon').get('techcoderx').get('teststreamchat2').once((data) => {
 //         console.log('data',data)
 //     })
 // })
@@ -36,4 +36,4 @@ let link = 'teststreamchat'
 1: Approved
 */
 
-Gun.user(alivedb_pk).get('dtc/techcoderx/teststreamchat/participants').get('hive').get('randomvlogs').once((val) => console.log('VAL',val))
+Gun.user(alivedb_pk).get('avalon/techcoderx/teststreamchat/participants').get('hive').get('randomvlogs').once((val) => console.log('VAL',val))

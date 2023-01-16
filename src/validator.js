@@ -2,7 +2,7 @@ const isIPFS = require('is-ipfs')
 
 let validator = {
     lists: {
-        network: ['dtc','hive'],
+        network: ['avalon','hive'],
         resolutions: ['src','240','480','720','1080']
     },
     network: (val) => {

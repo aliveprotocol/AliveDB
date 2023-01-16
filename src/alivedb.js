@@ -59,7 +59,7 @@ let db = {
     fetchStreamParticipants: (pub,listId) => {
         return new Promise((rs,rj) => {
             let result = {
-                dtc: [],
+                avalon: [],
                 hive: [],
                 blurt: []
             }
@@ -77,7 +77,7 @@ let db = {
                 middleware.participants = await middleware.getAccountKeysMulti(result)
                 rs(middleware.participants)
                 // Subscribe to requests
-                db.subRequests('dtc')
+                db.subRequests('avalon')
                 db.subRequests('hive')
                 db.subRequests('blurt')
                 // Subscribe to Hive decentralized blacklists if network is 'hive'

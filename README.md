@@ -81,7 +81,7 @@ curl -s --header "Content-Type: application/json" --data '{"pub":"a4DAmyHA23xjuL
 curl -s http://localhost:3006/fetchParticipantsKeys | jq
 
 {
-    "dtc": {
+    "avalon": {
         "techcoderx": [
             "2A2No4SzEG1k3YyKnQ2CBtrDXoMmeSqsfjs6AvDVMV8TA",
             "g1mUHD7s8U7yvAoJPT5xpG5VXg1zqFKBiLU6PGm6T3Ee",
@@ -107,7 +107,7 @@ curl -s http://localhost:3006/currentUser | jq
 
 ### Push new stream
 ```
-curl -s --header "Content-Type: application/json" --data '{"network":"dtc","streamer":"techcoderx","link":"stream1","stream":{"src":"QmNoa96v5gCfnzsdEbzZtrJvuXH14hS8k8DPPUQbdJMy7i","len":10}}' http://localhost:3006/pushStream | jq
+curl -s --header "Content-Type: application/json" --data '{"network":"avalon","streamer":"techcoderx","link":"stream1","stream":{"src":"QmNoa96v5gCfnzsdEbzZtrJvuXH14hS8k8DPPUQbdJMy7i","len":10}}' http://localhost:3006/pushStream | jq
 
 {
     "success": true
@@ -116,7 +116,7 @@ curl -s --header "Content-Type: application/json" --data '{"network":"dtc","stre
 
 ### Get stream with public key
 ```
-curl -s 'http://localhost:3006/getStream?pub=a4DAmyHA23xjuLc3XRcb5JdTrhH1HKJ5cqZhzkHO4kA.gGMwrIavPWOl07XVyQnGpGuNZAe3UbDC4bWvaulbsaA&network=dtc&streamer=techcoderx&link=stream1' | jq
+curl -s 'http://localhost:3006/getStream?pub=a4DAmyHA23xjuLc3XRcb5JdTrhH1HKJ5cqZhzkHO4kA.gGMwrIavPWOl07XVyQnGpGuNZAe3UbDC4bWvaulbsaA&network=avalon&streamer=techcoderx&link=stream1' | jq
 
 [
     {

@@ -8,7 +8,7 @@ let network = 'hive'
 let key = ''
 let ts = new Date().getTime()
 
-let streamNetwork = 'dtc'
+let streamNetwork = 'avalon'
 let streamer = 'techcoderx'
 let link = 'teststreamchat'
 
