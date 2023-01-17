@@ -132,11 +132,9 @@ function getAccountKeys(user,network) {
         if (!config[network+'_api']) return rs([])
         if (network === 'avalon')
             axios.get(config[network+'_api']+'/account/'+user).then((d) => {
-                // Allow master key and type 4 and 13 custom keys
                 let allowedKeys = [d.data.pub]
                 for (let i in d.data.keys)
-                    if (d.data.keys[i].types.includes(4) || d.data.keys[i].types.includes(13))
-                        allowedKeys.push(d.data.keys[i].pub)
+                    allowedKeys.push(d.data.keys[i].pub)
                 middleware.participants.avalon[user] = allowedKeys
                 rs(allowedKeys)
             }).catch(rj)
@@ -180,12 +178,10 @@ function getAccountKeysMulti(users) {
                 try {
                     d = await axios.get(config.avalon_api+'/accounts/'+users.avalon.join(','))
                 } catch { continue }
-                // Allow master key and type 4 and 13 custom keys
                 for (let i = 0; i < d.data.length; i++) {
                     let allowedKeys = [d.data[i].pub]
                     for (let j in d.data[i].keys)
-                        if (d.data[i].keys[j].types.includes(4) || d.data[i].keys[j].types.includes(13))
-                            allowedKeys.push(d.data[i].keys[j].pub)
+                        allowedKeys.push(d.data[i].keys[j].pub)
                     results.avalon[d.data[i].name] = allowedKeys
                 }
             } else {

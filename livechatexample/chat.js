@@ -140,12 +140,10 @@ function getAccountKeysMulti(users,fetchAll) {
                 try {
                     d = await axios.get('https://avalon.oneloved.tube/accounts/'+users.avalon.join(','))
                 } catch { continue }
-                // Allow master key and type 4 and 13 custom keys
                 for (let i = 0; i < d.data.length; i++) {
                     let allowedKeys = [d.data[i].pub]
                     for (let j in d.data[i].keys)
-                        if (d.data[i].keys[j].types.includes(4) || d.data[i].keys[j].types.includes(13))
-                            allowedKeys.push(d.data[i].keys[j].pub)
+                        allowedKeys.push(d.data[i].keys[j].pub)
                     results.avalon[d.data[i].name] = allowedKeys
                 }
             } else {

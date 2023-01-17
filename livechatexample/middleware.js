@@ -122,11 +122,9 @@ function getAccountKeys(user,network) {
         // todo blockchain api config
         if (network === 'avalon')
             axios.get('https://avalon.oneloved.tube/account/'+user).then((d) => {
-                // Allow master key and type 4 and 13 custom keys
                 let allowedKeys = [d.data.pub]
                 for (let i in d.data.keys)
-                    if (d.data.keys[i].types.includes(4) || d.data.keys[i].types.includes(13))
-                        allowedKeys.push(d.data.keys[i].pub)
+                    allowedKeys.push(d.data.keys[i].pub)
                 participants.avalon[user] = allowedKeys
                 rs(allowedKeys)
             }).catch(rj)
