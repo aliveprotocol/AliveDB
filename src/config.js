@@ -8,6 +8,11 @@ let config = {
     http_port: 3006,
     gun_port: 3007,
 
+    // login on startup
+    login_id: '',
+    login_pub: '',
+    login_password: '',
+
     // used for live chat only
     chat_listener: '',
     hive_api: '',

@@ -11,9 +11,24 @@ gunInstance = Gun
 gunUser = user
 
 let db = {
-    init: () => {
+    init: async () => {
         if (Config.gun_port)
             http.listen(Config.gun_port,() => console.log(`AliveDB GUN P2P server listening on port ${Config.gun_port}`))
+        
+        if ((Config.login_id || Config.login_pub) && Config.login_password) {
+            let id = Config.login_id
+            if (!id && Config.login_pub)
+                id = await db.getIdFromPub(req.body.pub)
+            if (!id)
+                console.log('Public key does not exist, skipping startup login')
+            else
+                db.login(id,Config.login_password,(e) => {
+                    if (e)
+                        console.log(`Failed to login on startup, user id: ${id}`)
+                    else
+                        console.log(`Logged in successfully on startup, user id: ${id}`)
+                })
+        }
     },
     createUser: (streamerID,aliveDbKey,cb) => {
         user.create(streamerID,aliveDbKey,(res) => {
