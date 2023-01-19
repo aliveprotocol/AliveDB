@@ -5,7 +5,9 @@ const argv = yargs(process.argv).argv
 let config = {
     data_dir: '',
     peers: [],
+    http_host: '127.0.0.1',
     http_port: 3006,
+    gun_host: '0.0.0.0',
     gun_port: 3007,
 
     // login on startup

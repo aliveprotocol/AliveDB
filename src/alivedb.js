@@ -13,7 +13,7 @@ gunUser = user
 let db = {
     init: async () => {
         if (Config.gun_port)
-            http.listen(Config.gun_port,() => console.log(`AliveDB GUN P2P server listening on port ${Config.gun_port}`))
+            http.listen(Config.gun_port,Config.gun_host,() => console.log(`AliveDB GUN P2P server listening on port ${Config.gun_port}`))
         
         if ((Config.login_id || Config.login_pub) && Config.login_password) {
             let id = Config.login_id
