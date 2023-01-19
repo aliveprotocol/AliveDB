@@ -68,7 +68,7 @@ let db = {
                 Gun.user(pub).get(listId+'/participants').get(listenerArr[0]).get(listenerArr[1]).put(1)
             Gun.user(pub).get(listId+'/participants').once(async (nets) => {
                 if (!nets) rs(result)
-                for (let n in nets) if (n !== '_' && result[n]) {
+                for (let n in nets) if (n !== '_' && result[n] && Config[n+'_api']) {
                     let netusers = await db.getItem(nets[n]['#'])
                     if (netusers && netusers._) delete netusers._
                     for (let u in netusers) if (netusers[u] !== 0)
@@ -77,9 +77,9 @@ let db = {
                 middleware.participants = await middleware.getAccountKeysMulti(result)
                 rs(middleware.participants)
                 // Subscribe to requests
-                db.subRequests('avalon')
-                db.subRequests('hive')
-                db.subRequests('blurt')
+                if (Config.avalon_api) db.subRequests('avalon')
+                if (Config.hive_api) db.subRequests('hive')
+                if (Config.blurt_api) db.subRequests('blurt')
                 // Subscribe to Hive decentralized blacklists if network is 'hive'
                 if (listenerArr[0] === 'hive')
                     middleware.streamHiveBlacklistedUsers(listenerArr[1])

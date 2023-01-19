@@ -7,6 +7,8 @@ let config = {
     peers: [],
     http_port: 3006,
     gun_port: 3007,
+
+    // used for live chat only
     chat_listener: '',
     hive_api: '',
     blurt_api: '',
