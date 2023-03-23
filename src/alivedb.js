@@ -111,7 +111,7 @@ let db = {
             let list = []
             Gun.user(pub).get(listId+'<?600').once(async (data) => {
                 let itemIds = Object.keys(data).sort((a,b) => data._['>'][a] - data._['>'][b])
-                for (let i = 1; i < itemIds.length; i++) if (new Date().getTime() - data._['>'][itemIds[i]] < 600000 && data._['>'][itemIds[i]] > minTs) {
+                for (let i = 1; i < itemIds.length; i++) if (new Date().getTime() - data._['>'][itemIds[i]] < 600000 && data._['>'][itemIds[i]] >= minTs) {
                     let itm = await db.getItem(data[itemIds[i]]['#'])
                     if (!retainGunInfo && itm && itm._)
                         delete itm._

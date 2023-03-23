@@ -121,7 +121,7 @@ curl -s --header "Content-Type: application/json" --data '{"network":"hive","str
 
 ### Get stream with public key
 ```
-curl -s 'http://localhost:3006/getStream?pub=a4DAmyHA23xjuLc3XRcb5JdTrhH1HKJ5cqZhzkHO4kA.gGMwrIavPWOl07XVyQnGpGuNZAe3UbDC4bWvaulbsaA&network=hive&streamer=techcoderx&link=stream1' | jq
+curl -s 'http://localhost:3006/getStream?pub=a4DAmyHA23xjuLc3XRcb5JdTrhH1HKJ5cqZhzkHO4kA.gGMwrIavPWOl07XVyQnGpGuNZAe3UbDC4bWvaulbsaA&network=hive&streamer=techcoderx&link=stream1&ts=189394384393' | jq
 
 [
     {
