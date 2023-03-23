@@ -17,7 +17,6 @@ const config = require('./config')
 // todo detect for public key updates in realtime?
 let middleware = {
     participants: {
-        avalon: {},
         hive: {},
         blurt: {}
     },
@@ -28,8 +27,8 @@ let middleware = {
     streamHiveBlacklistedUsers
 }
 
-const allowedMsgFields = ['_','u','n','s','r','t','m']
-const allowedReqFields = ['_','s','r','t']
+const allowedMsgFields = ['_','u','n','s','t','m']
+const allowedReqFields = ['_','s','t']
 
 GunDB.on('opt',function (ctx) {
     if (ctx.once) return
@@ -48,15 +47,14 @@ GunDB.on('opt',function (ctx) {
                 /*
                 {
                     u: 'username',
-                    n: 'network (avalon, hive, blurt etc)',
+                    n: 'network (hive, blurt etc)',
                     s: 'signature',
-                    r: recid,
                     t: timestamp,
                     m: 'my chat message goes here'
                 }
                 */
-                if (!received.u || !received.n || !received.s || (received.n === 'avalon' && !received.r && received.r !== 0) || !received.t || !received.m) return
-                if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return
+                if (!received.u || !received.n || !received.s || !received.t || !received.m) return
+                if (typeof received.u !== 'string' || typeof received.s !== 'string' || typeof received.t !== 'number' || typeof received.m !== 'string') return
                 if (!middleware.participants[received.n] || (config.chat_listener && !middleware.participants[received.n][received.u])) return
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
 
@@ -69,11 +67,7 @@ GunDB.on('opt',function (ctx) {
                 // Recover public key from message signature
                 let pubkeystr = ''
                 try {
-                    let hash = cg.createHash(received.t,received.u,received.n,received.m,keydet[1],keydet[2],keydet[3])
-                    if (received.n === 'avalon')
-                        pubkeystr = cg.avalonRecoverFromSig(received.s,received.r,hash)
-                    else
-                        pubkeystr = cg.Signature.fromString(received.s).recover(hash)
+                    pubkeystr = cg.Signature.fromString(received.s).recover(hash)
                 } catch { return }
 
                 // Verify public key in account
@@ -87,9 +81,8 @@ GunDB.on('opt',function (ctx) {
                 // Format should be alivedb_chat_request/stream_network/streamer/link/participant_network/participant_username
                 if (!gunUser || !gunUser.is) return
                 if (!received.s || !received.t) return
-                if (typeof received.s !== 'string' || typeof received.t !== 'number' || (received.r && typeof received.r !== 'number')) return
+                if (typeof received.s !== 'string' || typeof received.t !== 'number') return
                 if (!middleware.participants[keydet[4]]) return
-                if (keydet[4] === 'avalon' && !received.r && received.r !== 0 && typeof received.r !== 'number') return
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
                 if (Math.abs(received.t - new Date().getTime() > 10000)) return
                 for (let fields in received) if (!allowedReqFields.includes(fields)) return
@@ -100,11 +93,7 @@ GunDB.on('opt',function (ctx) {
                         let validKeys = []
                         try {
                             let hash = cg.createHashRequest(received.t,keydet[5],keydet[4],keydet[1],keydet[2],keydet[3])
-                            let pubkeystr = ''
-                            if (keydet[4] === 'avalon')
-                                pubkeystr = cg.avalonRecoverFromSig(received.s,received.r,hash)
-                            else
-                                pubkeystr = cg.Signature.fromString(received.s).recover(hash)
+                            let pubkeystr = cg.Signature.fromString(received.s).recover(hash)
                             validKeys = await getAccountKeys(keydet[5],keydet[4])
                             if (!validKeys.includes(pubkeystr)) return
                         } catch (e) { return }
@@ -130,15 +119,7 @@ function getAccountKeys(user,network) {
     return new Promise(async (rs,rj) => {
         if (middleware.participants[network][user]) return rs(middleware.participants[network][user])
         if (!config[network+'_api']) return rs([])
-        if (network === 'avalon')
-            axios.get(config[network+'_api']+'/account/'+user).then((d) => {
-                let allowedKeys = [d.data.pub]
-                for (let i in d.data.keys)
-                    allowedKeys.push(d.data.keys[i].pub)
-                middleware.participants.avalon[user] = allowedKeys
-                rs(allowedKeys)
-            }).catch(rj)
-        else {
+        if (network === 'hive' || network === 'blurt') {
             let rpc = config[network+'_api']
             axios.post(rpc,{
                 id: 1,
@@ -167,24 +148,13 @@ function getAccountKeysMulti(users) {
     return new Promise(async (rs,rj) => {
         // todo blockchain api config
         let results = {
-            avalon: {},
             hive: {},
             blurt: {}
         }
         for (let nets in users) {
             let d
             if (!config[nets+'_api']) continue
-            if (nets === 'avalon') {
-                try {
-                    d = await axios.get(config.avalon_api+'/accounts/'+users.avalon.join(','))
-                } catch { continue }
-                for (let i = 0; i < d.data.length; i++) {
-                    let allowedKeys = [d.data[i].pub]
-                    for (let j in d.data[i].keys)
-                        allowedKeys.push(d.data[i].keys[j].pub)
-                    results.avalon[d.data[i].name] = allowedKeys
-                }
-            } else {
+            if (nets === 'hive' || nets === 'blurt') {
                 let rpc = config[nets+'_api']
                 try {
                     d = await axios.post(rpc,{

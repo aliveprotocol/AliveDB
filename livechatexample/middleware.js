@@ -1,8 +1,8 @@
 // Same middleware file as in AliveDB but striped down for browsers.
 
 // To use this middleware, import this file right after importing gundb.
-const allowedMsgFields = ['_','u','n','s','r','t','m']
-const allowedReqFields = ['_','s','r','t']
+const allowedMsgFields = ['_','u','n','s','t','m']
+const allowedReqFields = ['_','s','t']
 
 let blacklistedUsersHiveInterval = null
 let blacklistedUsersHive = []
@@ -24,15 +24,15 @@ Gun.on('opt',function (ctx) {
                 /*
                 {
                     u: 'username',
-                    n: 'network (avalon, hive, blurt etc)',
+                    n: 'network (hive, blurt etc)',
                     s: 'signature',
                     r: recid,
                     t: timestamp,
                     m: 'my chat message goes here'
                 }
                 */
-                if (!received.u || !received.n || !received.s || (received.n === 'avalon' && !received.r && received.r !== 0) || !received.t || !received.m) return
-                if (typeof received.u !== 'string' || typeof received.s !== 'string' || (received.r && typeof received.r !== 'number') || typeof received.t !== 'number' || typeof received.m !== 'string') return
+                if (!received.u || !received.n || !received.s || !received.t || !received.m) return
+                if (typeof received.u !== 'string' || typeof received.s !== 'string' || typeof received.t !== 'number' || typeof received.m !== 'string') return
                 if (!participants[received.n]) return
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
 
@@ -45,20 +45,15 @@ Gun.on('opt',function (ctx) {
                 // Recover public key from message signature
                 let pubkeystr = ''
                 try {
-                    let hash = cg.createHash(received.t,received.u,received.n,received.m,keydet[1],keydet[2],keydet[3])
-                    if (received.n === 'avalon')
-                        pubkeystr = cg.avalonRecoverFromSig(received.s,received.r,hash)
-                    else
-                        pubkeystr = cg.Signature.fromString(received.s).recover(hash)
+                    pubkeystr = cg.Signature.fromString(received.s).recover(hash)
                 } catch { return }
 
                 // Verify public key in account
                 if (!participants[received.n][received.u] || !participants[received.n][received.u].includes(pubkeystr)) return
             } else if (gundbMod && gundbMod.is && key.length > 0 && key[0].startsWith('alivedb_chat_request/'+getLinkPath()) && keydet.length === 6) {
                 if (!received.s || !received.t) return
-                if (typeof received.s !== 'string' || typeof received.t !== 'number' || (received.r && typeof received.r !== 'number')) return
+                if (typeof received.s !== 'string' || typeof received.t !== 'number') return
                 if (!participants[keydet[4]]) return
-                if (keydet[4] === 'avalon' && !received.r && received.r !== 0 && typeof received.r !== 'number') return
                 if (Math.abs(received.t - received._['>'].t) > 30000) return
                 if (Math.abs(received.t - new Date().getTime() > 10000)) return
                 for (let fields in received) if (!allowedReqFields.includes(fields)) return
@@ -69,11 +64,7 @@ Gun.on('opt',function (ctx) {
                         let validKeys = []
                         try {
                             let hash = cg.createHashRequest(received.t,keydet[5],keydet[4],keydet[1],keydet[2],keydet[3])
-                            let pubkeystr = ''
-                            if (keydet[4] === 'avalon')
-                                pubkeystr = cg.avalonRecoverFromSig(received.s,received.r,hash)
-                            else
-                                pubkeystr = cg.Signature.fromString(received.s).recover(hash)
+                            let pubkeystr = pubkeystr = cg.Signature.fromString(received.s).recover(hash)
                             validKeys = await getAccountKeys(keydet[5],keydet[4])
                             if (!validKeys.includes(pubkeystr)) return
                         } catch (e) { return }
@@ -119,16 +110,8 @@ function blacklistParticipant(network,user,alrt) {
 function getAccountKeys(user,network) {
     return new Promise(async (rs,rj) => {
         if (participants[network][user]) return rs(participants[network][user])
-        // todo blockchain api config
-        if (network === 'avalon')
-            axios.get('https://avalon.oneloved.tube/account/'+user).then((d) => {
-                let allowedKeys = [d.data.pub]
-                for (let i in d.data.keys)
-                    allowedKeys.push(d.data.keys[i].pub)
-                participants.avalon[user] = allowedKeys
-                rs(allowedKeys)
-            }).catch(rj)
-        else {
+        if (network === 'hive' || network === 'blurt') {
+            // api node should respect frontend preferences
             let rpc = network === 'hive' ? 'https://techcoderx.com' : 'https://blurt-rpc.saboin.com'
             axios.post(rpc,{
                 id: 1,

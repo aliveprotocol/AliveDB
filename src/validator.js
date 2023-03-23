@@ -2,7 +2,7 @@ const isIPFS = require('is-ipfs')
 
 let validator = {
     lists: {
-        network: ['avalon','hive'],
+        network: ['blurt','hive'],
         resolutions: ['src','240','480','720','1080']
     },
     network: (val) => {
@@ -12,23 +12,6 @@ let validator = {
             return 'invalid network data type'
         else if (!validator.lists.network.includes(val))
             return 'invalid network'
-        return null
-    },
-    dtcUsername: (username) => {
-        if (typeof username !== 'string') return 'username must be a string'
-        if (username.length < 1 || username.length > 50) return 'username nust be between 1 and 50 characters long'
-        let allowedUsernameChars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-        let allowedUsernameCharsOnlyMiddle = '-.'
-        username = username.toLowerCase()
-        for (let i = 0; i < username.length; i++) {
-            const c = username[i]
-            // allowed username chars
-            if (allowedUsernameChars.indexOf(c) === -1) 
-                if (allowedUsernameCharsOnlyMiddle.indexOf(c) === -1)
-                    return 'invalid character ' + c
-                else if (i === 0 || i === username.length-1)
-                    return 'character ' + c + ' can only be in the middle'
-        }
         return null
     },
     hiveUsername: (value) => {
@@ -57,6 +40,7 @@ let validator = {
         }
         return null
     },
+    blurtUsername: (val) => validator.hiveUsername(val),
     link: (val) => {
         if (typeof val !== 'string')
             return 'Link must be a string'
@@ -66,14 +50,21 @@ let validator = {
             return 'Link must only contain letters, digits, dashes and underscores'
         return null
     },
-    aliveDbId: (val) => {
+    aliveDbId: (val = '') => {
         if (!val)
             return 'User ID is required'
         if (typeof val !== 'string')
             return 'User ID must be a string'
         else if (val.length < 3 || val.length > 50)
             return 'User ID must be between 3 and 50 characters long'
-        return validator.dtcUsername(val)
+        let allowedChars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+        val = val.toLowerCase()
+        for (let i = 0; i < val.length; i++) {
+            const c = val[i]
+            if (allowedChars.indexOf(c) === -1) 
+                return 'invalid character ' + c
+        }
+        return null
     },
     aliveDbKey: (val) => {
         if (!val)
