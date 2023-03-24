@@ -105,7 +105,7 @@ app.get('/getStream',async (req,res) => {
     let minTs = parseInt(req.query.ts)
     if (isNaN(req.query.ts) || minTs < 0)
         minTs = 0
-    res.send(await db.getListFromUser(req.query.pub,req.query.network + '/' + req.query.streamer + '/' + req.query.link,false,minTs))
+    res.send(await db.getListFromUser(req.query.pub,req.query.network + '/' + req.query.streamer + '/' + req.query.link,minTs))
 })
 
 module.exports = app
