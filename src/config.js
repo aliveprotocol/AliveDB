@@ -1,4 +1,7 @@
 const yargs = require('yargs')
+const dotenv = require('dotenv')
+
+dotenv.config()
 const argv = yargs(process.argv).argv
 
 // Default config
