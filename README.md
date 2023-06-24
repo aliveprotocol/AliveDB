@@ -27,11 +27,6 @@ git submodule add https://github.com/aliveprotocol/AliveDB [submodule_dir]
 npm start
 ```
 
-### Compile as self-contained executable
-```
-npm run build
-```
-
 ## Configuration
 
 Refer to the [config docs](https://aliveprotocol.com/docs/alivedb/config) for details.
