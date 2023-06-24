@@ -110,20 +110,9 @@ let validator = {
                 return 'Invalid resolution ' + resolutions[i]
             else if (typeof info[resolutions[i]] !== 'string')
                 return resolutions[i] + ' hash must be a string'
-            else if (!isIPFS.cid(info[resolutions[i]]) && validator.skylink(info[resolutions[i]]) !== null)
+            else if (!isIPFS.cid(info[resolutions[i]]))
                 return 'Invalid ' + resolutions[i] + ' hash'
         }
-        return null
-    },
-    skylink: (skylink) => {
-        if (typeof skylink !== 'string')
-            return 'Skylinks must be a string'
-        else if (skylink.length !== 46)
-            return 'Skylinks must be 46 characters long'
-        let skyAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
-        for (let i = 0; i < skylink.length; i++)
-            if (skyAlphabet.indexOf(skylink[i]) === -1)
-                return 'Invalid character found in Skylink'
         return null
     }
 }
