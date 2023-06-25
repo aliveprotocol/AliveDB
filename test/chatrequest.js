@@ -1,6 +1,6 @@
 const GunDB = require('gun')
 const Gun = GunDB({ peers: ['http://localhost:3007/gun'], file: 'radata2' })
-// const cg = require('./cryptography')
+// const cg = require('./hivecryptPro')
 
 let alivedb_pk = ''
 

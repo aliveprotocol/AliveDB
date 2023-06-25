@@ -1,6 +1,7 @@
 const helper = require('./helper')
 const validator = require('./validator')
 const db = require('./alivedb')
+const tokenAuth = require('./tokenAuth')
 const config = require('./config')
 const Express = require('express')
 const bodyParser = require('body-parser')
@@ -73,6 +74,7 @@ app.get('/currentUser',(req,res) => {
         res.send({loggedIn: false})
     else {
         currentUser.loggedIn = true
+        currentUser.requiresAccessToken = config.require_access_token
         res.send(currentUser)
     }
 })
@@ -84,8 +86,41 @@ app.get('/fetchParticipantsKeys',async (req,res) => {
     res.send(authorizedKeys)
 })
 
+// Get access token
+app.post('/getToken',(request,response) => {
+    if (!config.require_access_token)
+        return response.status(500).send({error: 'Access tokens are not enabled'})
+    tokenAuth.verifyAuthSignature(request.body,(valid,error) => {
+        if (!valid)
+            return response.status(400).send({error: 'Could not verify signature and/or recent block info: '+error})
+        let split = request.body.split(':')
+        let token = tokenAuth.generateJWT(split[0],split[1],split[3])
+        response.send({access_token: token, error: null})
+    })
+})
+
 // Push new stream chunk as current logged in user
-app.post('/pushStream',(req,res) => {
+app.post('/pushStream', async (req,res) => {
+    if (typeof req.body !== 'object')
+        return res.status(400).send({error: 'Request body must be an object containing stream details'})
+    if (config.require_access_token) {
+        let authHeader = req.header('Authorization')
+        let authDetails = {}
+        if (!authHeader)
+            return res.status(401).send({error: 'Missing authentication header'})
+        try {
+            let authTk = authHeader.split(' ')
+            if (authTk.length < 2)
+                return res.status(401).send({error: 'Invalid bearer auth token'})
+            authDetails = tokenAuth.verifyAccessToken(authTk[1])
+        } catch (e) {
+            return res.status(401).send({error: e})
+        }
+        // override metadata
+        req.body.streamer = authDetails.user
+        req.body.network = authDetails.network
+        req.body.link = authDetails.link
+    }
     let currentUser = db.currentUser()
     if (!currentUser)
         return res.status(401).send({error: 'Not logged in'})

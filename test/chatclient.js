@@ -1,4 +1,4 @@
-const cg = require('../src/cryptography')
+const cg = require('../src/hivecryptPro')
 const GunDB = require('gun')
 const Gun = GunDB({ peers: ['http://localhost:3007/gun'], file: 'radata2' })
 

@@ -73,6 +73,7 @@ let db = {
     },
     fetchStreamParticipants: (pub,listId) => {
         return new Promise((rs,rj) => {
+            if (!Config.chat_listener) return
             let result = {
                 hive: [],
                 blurt: []

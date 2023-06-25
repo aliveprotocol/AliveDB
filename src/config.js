@@ -6,7 +6,7 @@ const argv = yargs(process.argv).argv
 
 // Default config
 let config = {
-    data_dir: '',
+    data_dir: __dirname+'/../radata',
     peers: [],
     http_host: '127.0.0.1',
     http_port: 3006,
@@ -18,9 +18,15 @@ let config = {
     login_pub: '',
     login_password: '',
 
+    // access token generation
+    require_access_token: false,
+    auth_timeout_blocks: 20,
+    auth_identifier: 'alivedb_login',
+    auth_token_expiry: 86400,
+
     // used for live chat only
     chat_listener: '',
-    hive_api: '',
+    hive_api: 'https://techcoderx.com',
     blurt_api: ''
 }
 
@@ -31,5 +37,9 @@ for (let c in config)
 // Comma separated peers list
 if (typeof config.peers === 'string')
     config.peers = config.peers.split(',')
+
+// Booleans
+if (typeof config.require_access_token === 'string' && (config.require_access_token === '1' || config.require_access_token.toLowerCase() === 'true'))
+    config.require_access_token = true
 
 module.exports = config

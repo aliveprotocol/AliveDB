@@ -11,7 +11,7 @@
 // To use this middleware, import this file right after importing gundb.
 const GunDB = require('gun/gun')
 const axios = require('axios')
-const cg = require('./cryptography')
+const cg = require('./hivecryptPro')
 const config = require('./config')
 
 // todo detect for public key updates in realtime?

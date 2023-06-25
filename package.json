@@ -17,7 +17,9 @@
     "dotenv": "^16.0.3",
     "express": "^4.17.1",
     "gun": "^0.2020.1239",
+    "hivecrypt": "^2.0.6",
     "is-ipfs": "^2.0.0",
+    "jsonwebtoken": "^9.0.0",
     "secp256k1": "^4.0.2",
     "text-encoding": "^0.7.0",
     "yargs": "^16.1.0"
