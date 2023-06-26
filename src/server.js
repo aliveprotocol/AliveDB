@@ -14,6 +14,7 @@ if (config.require_access_token)
 
 // parse application/json
 app.use(bodyParser.json())
+app.use(bodyParser.text())
 
 // Create AliveDB user account
 app.post('/createUser',(req,res) => {
