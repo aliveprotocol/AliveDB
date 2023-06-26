@@ -75,6 +75,8 @@ app.get('/currentUser',(req,res) => {
     else {
         currentUser.loggedIn = true
         currentUser.requiresAccessToken = config.require_access_token
+        if (config.require_access_token)
+            currentUser.authId = config.auth_identifier
         res.send(currentUser)
     }
 })
