@@ -9,6 +9,9 @@ const app = Express()
 
 db.init()
 
+if (config.require_access_token)
+    tokenAuth.loadKeys()
+
 // parse application/json
 app.use(bodyParser.json())
 
