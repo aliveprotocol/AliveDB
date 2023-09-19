@@ -104,6 +104,8 @@ let validator = {
             return 'Missing stream chunk'
         if (typeof info.len !== 'number')
             return 'Stream chunk length must be a number'
+        if (typeof info.src !== 'string' || !isIPFS.cid(info.src))
+            return 'Valid src hash is required'
         let resolutions = Object.keys(info)
         for (let i in resolutions) if (resolutions[i] !== 'len') {
             if (!validator.lists.resolutions.includes(resolutions[i]))
