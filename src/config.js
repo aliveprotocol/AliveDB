@@ -26,6 +26,7 @@ let config = {
 
     // used for live chat only
     chat_listener: '',
+    chat_middleware_enabled: false,
     hive_api: 'https://techcoderx.com',
     blurt_api: ''
 }

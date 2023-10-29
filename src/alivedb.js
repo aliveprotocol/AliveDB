@@ -1,8 +1,10 @@
 const Config = require('./config')
 const http = require('http').createServer()
 const GunDB = require('gun')
-const middleware = require('./middleware')
+const  middleware = Config.chat_middleware_enabled ? require('./middleware') : null
 const Gun = GunDB({ web: http, peers: Config.peers, file: Config.data_dir })
+
+console.log('Peers:',Config.peers)
 
 let user = Gun.user()
 
@@ -73,7 +75,7 @@ let db = {
     },
     fetchStreamParticipants: (pub,listId) => {
         return new Promise((rs,rj) => {
-            if (!Config.chat_listener) return
+            if (!Config.chat_listener || !middleware) return
             let result = {
                 hive: [],
                 blurt: []
