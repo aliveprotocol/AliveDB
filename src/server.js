@@ -86,6 +86,8 @@ app.get('/currentUser',(req,res) => {
 })
 
 app.get('/fetchParticipantsKeys',async (req,res) => {
+    if (!config.chat_middleware_enabled)
+        return res.status(500).send({error: 'Live chat functionality not enabled'})
     if (!db.currentUser())
         return res.status(401).send({error: 'Not logged in'})
     let authorizedKeys = await db.fetchStreamParticipants(db.currentUser().pub,config.chat_listener)
