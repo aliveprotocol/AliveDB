@@ -16,6 +16,10 @@ if (config.require_access_token)
 app.use(bodyParser.json())
 app.use(bodyParser.text())
 
+app.get('/', (req, res) => {
+    return res.send({ok: 1, message: 'AliveDB server'})
+})
+
 // Create AliveDB user account
 app.post('/createUser',(req,res) => {
     let id = req.body.id || helper.randomId(16)
