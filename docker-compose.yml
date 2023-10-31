@@ -1,0 +1,31 @@
+# bootstrap multiple GunDB relays
+version: '3'
+services:
+  alivedb-peer-1:
+    image: alivedb
+    build: .
+    container_name: alivedb-peer-1
+    volumes:
+      - ./radata/1:/app/data
+    ports:
+      - 3106:3006
+      - 3107:3007
+    environment:
+      - ALIVEDB_PEERS=http://172.17.0.1:8765/gun
+  alivedb-peer-2:
+    image: alivedb
+    build: .
+    container_name: alivedb-peer-2
+    volumes:
+      - ./radata/2:/app/data
+    ports:
+      - 3206:3006
+      - 3207:3007
+    environment:
+      - ALIVEDB_PEERS=http://172.17.0.1:8765/gun
+  gundb-relay:
+    image: gundb
+    build: https://github.com/amark/gun.git
+    container_name: gundb-relay
+    ports:
+      - 8765:8765
